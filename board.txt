@@ -1,0 +1,20 @@
+Board:
+6| P | R | O | G | O | R | P | 
+
+5|   | K | P | P | P | K |   | 
+
+4|   |   |   |   |   |   |   | 
+
+3|   |   |   |   |   |   |   | 
+
+2|   |   |   |   |   |   |   | 
+
+1|   | k | p | p | p | k |   | 
+
+0| p | r | o | g | o | r | p | 
+
+   a   b   c   d   e   f   g 
+
+
+
+Draw: BOTH players have made 100 moves
