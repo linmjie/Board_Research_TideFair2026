@@ -18,3 +18,45 @@ Board:
 
 
 Draw: BOTH players have made 100 moves
+
+white is uppercase, black is lowercase
+
+BitBoards:
+    P - 1000001     Int:  286835095896064, Hex:  0x104e000000000
+        00111+2
+        +7*5
+    
+    R - 01001+1i    Int:  79164837199872,  Hex:  0x480000000000
+        +7*6
+
+    O - 00101+2     Int:  87960930222080,  Hex:  0x500000000000
+        +7*6
+
+    G - 0001+3      Int:  35184372088832,  Hex:  0x200000000000
+        +7*6
+
+    K - 0000000     Int:  1168231104512,   Hex:  0x11000000000
+        0100010
+        +7*5
+
+
+    k - 7*5+        Int:  4352,            Hex:  0x1100
+        0100010
+        +7
+
+    p - 7*5+        Int:  3649,            Hex:  0xe41
+        0011100
+        1000001
+
+    r - 7*6+        Int:  34,              Hex:  0x22
+        0100010
+
+    o - 7*6+        Int:  20,              Hex:  0x14
+        0010100
+
+    g - 7*6+        Int:  8,               Hex:  0x8
+        0001000
+
+    | (or operator) concatenates boards
+    & (and operator) makes board of overlap
+    ^ (xor operator) concatenates but removes overlap
