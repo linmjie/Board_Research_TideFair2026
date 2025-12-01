@@ -1,5 +1,5 @@
 CPP = g++
-FLAGS =
+FLAGS = -std=c++11
 
 output: board.o main.o
 	$(CPP) $(FLAGS) -o output board.o main.o
@@ -11,4 +11,4 @@ board.o: Board.cpp
 	$(CPP) $(FLAGS) -c Board.cpp -o board.o
 
 clean:
-	rm output board.o
+	rm output board.o main.o

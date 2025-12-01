@@ -3,7 +3,8 @@
 
 int main(){
     Board board;
-    std::cout << board.b_board << '\n';
+    ul someint = board.b_board | board.w_board;
+    std::cout << someint << '\n';
 
  	ul a = 12;
 	std::cout << a << '\n';
