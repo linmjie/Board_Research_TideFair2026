@@ -1,8 +1,9 @@
 CPP = g++
 FLAGS = -std=c++11
+ALL = main.o board.o movegen.o boardutil.o 
 
-output: board.o main.o
-	$(CPP) $(FLAGS) -o output board.o main.o
+output: $(ALL) 
+	$(CPP) $(FLAGS) -o output $(ALL)
 
 main.o: main.cpp
 	$(CPP) $(FLAGS) -c main.cpp -o main.o
@@ -10,5 +11,11 @@ main.o: main.cpp
 board.o: Board.cpp
 	$(CPP) $(FLAGS) -c Board.cpp -o board.o
 
+movegen.o: MoveGen.cpp
+	$(CPP) $(FLAGS) -c MoveGen.cpp -o movegen.o
+
+boardutil.o: BoardUtil.cpp
+	$(CPP) $(FLAGS) -c BoardUtil.cpp -o boardutil.o
+
 clean:
-	rm output board.o main.o
+	rm output $(ALL) 

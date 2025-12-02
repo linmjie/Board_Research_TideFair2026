@@ -1,6 +1,8 @@
 #pragma once
+
 using ul = unsigned long;
-constexpr ul MAX = 562949953421311; //2^49 - 1
+using byte = unsigned char;
+#define MAX_49 ((1ULL << 49) - 1)
 
 constexpr ul WHITE_GENERAL = 0x8;
 constexpr ul WHITE_OFFICER = 0x14;
@@ -48,6 +50,25 @@ class Board{
             this->b_pawn = BLACK_PAWN;
             this->b_board = BLACK_BOARD;
         } 
-
 };
 
+//Hopefully no need to bitpack this into one byte
+struct move{
+    byte origin; //An integer position, not a bitboard
+    byte destination; //An integer position, not a bitboard
+};
+
+namespace generator{
+/*
+    Returns a pointer to an array of all legal moves, first move.origin defines length; 
+    move **temp = generator::moves(board); 
+    byte size = (*temp[0]).origin; 
+    move *moves = &(*temp[1]); 
+*/
+    move **moves(Board board);
+    ul basicGeneralMask(ul general);
+    ul basicOfficerMask(ul officer);
+    ul basicRookMask(ul rook);
+    ul basicKnightMask(ul knight);
+    ul basicPawnMask(ul pawn);
+}
