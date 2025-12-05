@@ -10,5 +10,7 @@ int main(){
     
     move movie;
 	std::cout << a << '\n';
+
+    printBitBoard(1);
     return 0;
 }

@@ -2,7 +2,15 @@
 
 using ul = unsigned long;
 using byte = unsigned char;
-#define MAX_49 ((1ULL << 49) - 1)
+constexpr ul MAX_49 = ((1ULL << 49) - 1);
+
+constexpr ul FILE_A = 0x04081020408041ULL;
+//contexpr ul FILE_B =    
+//contexpr ul FILE_C =    
+//contexpr ul FILE_D =    
+//contexpr ul FILE_E =    
+//contexpr ul FILE_F =    
+//contexpr ul FILE_G =  
 
 constexpr ul WHITE_GENERAL = 0x8;
 constexpr ul WHITE_OFFICER = 0x14;
@@ -19,6 +27,8 @@ constexpr ul BLACK_PAWN = 0x104e000000000;
 constexpr ul BLACK_BOARD = BLACK_GENERAL | BLACK_OFFICER | BLACK_ROOK | BLACK_KNIGHT | BLACK_PAWN;
 
 constexpr ul FULL_BOARD = WHITE_BOARD | BLACK_BOARD;
+
+void printBitBoard(ul pos);
 
 class Board{
     public:
@@ -63,7 +73,8 @@ namespace generator{
     Returns a pointer to an array of all legal moves, first move.origin defines length; 
     move **temp = generator::moves(board); 
     byte size = (*temp[0]).origin; 
-    move *moves = &(*temp[1]); 
+    move *moves = &(*temp[1]);
+    delete temp;
 */
     move **moves(Board board);
     ul basicGeneralMask(ul general);
