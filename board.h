@@ -1,34 +1,47 @@
 #pragma once
+#include<array>
 
 using ul = unsigned long;
 using byte = unsigned char;
-constexpr ul MAX_49 = ((1ULL << 49) - 1);
 
-constexpr ul FILE_A = 0x04081020408041ULL;
-//contexpr ul FILE_B =    
-//contexpr ul FILE_C =    
-//contexpr ul FILE_D =    
-//contexpr ul FILE_E =    
-//contexpr ul FILE_F =    
-//contexpr ul FILE_G =  
-
-constexpr ul WHITE_GENERAL = 0x8;
-constexpr ul WHITE_OFFICER = 0x14;
-constexpr ul WHITE_ROOK = 0x22;
-constexpr ul WHITE_KNIGHT = 0x1100;
-constexpr ul WHITE_PAWN = 0xe41;
-constexpr ul WHITE_BOARD = WHITE_GENERAL | WHITE_OFFICER | WHITE_ROOK | WHITE_KNIGHT | WHITE_PAWN;
-
-constexpr ul BLACK_GENERAL = 0x200000000000;
-constexpr ul BLACK_OFFICER = 0x500000000000;
-constexpr ul BLACK_ROOK = 0x880000000000;
-constexpr ul BLACK_KNIGHT = 0x11000000000;
-constexpr ul BLACK_PAWN = 0x104e000000000;
-constexpr ul BLACK_BOARD = BLACK_GENERAL | BLACK_OFFICER | BLACK_ROOK | BLACK_KNIGHT | BLACK_PAWN;
-
-constexpr ul FULL_BOARD = WHITE_BOARD | BLACK_BOARD;
-
-namespace board{
+namespace board {
+    constexpr ul MAX_49 = ((1ULL << 49) - 1);
+    constexpr ul PRE_BOARD_ONES = 0xfffe000000000000; 
+    constexpr ul MAX_MOVES = 255; //max possible moves
+    
+    constexpr ul FILE_A = 0x1020408102040;
+    constexpr ul FILE_B = 0x810204081020;
+    constexpr ul FILE_C = 0x408102040810;
+    constexpr ul FILE_D = 0x204081020408;
+    constexpr ul FILE_E = 0x102040810204;
+    constexpr ul FILE_F = 0x81020408102;
+    constexpr ul FILE_G = 0x40810204081;
+    
+    constexpr ul RANK_1 = 0x1020408102040;
+    constexpr ul RANK_2 = 0x810204081020;
+    constexpr ul RANK_3 = 0x408102040810;
+    constexpr ul RANK_4 = 0x204081020408;
+    constexpr ul RANK_5 = 0x102040810204;
+    constexpr ul RANK_6 = 0x81020408102;
+    constexpr ul RANK_7 = 0x40810204081;
+    
+    
+    constexpr ul WHITE_GENERAL = 0x8;
+    constexpr ul WHITE_OFFICER = 0x14;
+    constexpr ul WHITE_ROOK = 0x22;
+    constexpr ul WHITE_KNIGHT = 0x1100;
+    constexpr ul WHITE_PAWN = 0xe41;
+    constexpr ul WHITE_BOARD = WHITE_GENERAL | WHITE_OFFICER | WHITE_ROOK | WHITE_KNIGHT | WHITE_PAWN;
+    
+    constexpr ul BLACK_GENERAL = 0x200000000000;
+    constexpr ul BLACK_OFFICER = 0x500000000000;
+    constexpr ul BLACK_ROOK = 0x880000000000;
+    constexpr ul BLACK_KNIGHT = 0x11000000000;
+    constexpr ul BLACK_PAWN = 0x104e000000000;
+    constexpr ul BLACK_BOARD = BLACK_GENERAL | BLACK_OFFICER | BLACK_ROOK | BLACK_KNIGHT | BLACK_PAWN;
+    
+    constexpr ul FULL_BOARD = WHITE_BOARD | BLACK_BOARD;
+    
     void printBitBoard(ul pos);
 }
 
@@ -49,18 +62,18 @@ class Board{
         ul b_board;
 
         Board(){ //intial board at start of game
-            this->w_general = WHITE_GENERAL;
-            this->w_officer = WHITE_OFFICER;
-            this->w_rook = WHITE_ROOK;
-            this->w_knight = WHITE_KNIGHT;
-            this->w_pawn = WHITE_PAWN;
-            this->w_board = WHITE_BOARD;
-            this->b_general = BLACK_GENERAL;
-            this->b_officer = BLACK_OFFICER;
-            this->b_rook = BLACK_ROOK;
-            this->b_knight = BLACK_KNIGHT;
-            this->b_pawn = BLACK_PAWN;
-            this->b_board = BLACK_BOARD;
+            this->w_general = board::WHITE_GENERAL;
+            this->w_officer = board::WHITE_OFFICER;
+            this->w_rook = board::WHITE_ROOK;
+            this->w_knight = board::WHITE_KNIGHT;
+            this->w_pawn = board::WHITE_PAWN;
+            this->w_board = board::WHITE_BOARD;
+            this->b_general = board::BLACK_GENERAL;
+            this->b_officer = board::BLACK_OFFICER;
+            this->b_rook = board::BLACK_ROOK;
+            this->b_knight = board::BLACK_KNIGHT;
+            this->b_pawn = board::BLACK_PAWN;
+            this->b_board = board::BLACK_BOARD;
         } 
 };
 
@@ -71,14 +84,7 @@ struct move{
 };
 
 namespace generator{
-/*
-    Returns a pointer to an array of all legal moves, first move.origin defines length; 
-    move **temp = generator::moves(board); 
-    byte size = (*temp[0]).origin; 
-    move *moves = &(*temp[1]);
-    delete temp;
-*/
-    move **moves(Board board);
+    std::array<move, board::MAX_MOVES> moves(Board board);
     ul basicGeneralMask(ul general);
     ul basicOfficerMask(ul officer);
     ul basicRookMask(ul rook);

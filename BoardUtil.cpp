@@ -11,11 +11,4 @@ void board::printBitBoard(ul pos){
     }
 }
 
-//compute all the very basic move masks for each piece at each position
-//(no checks, no blocks, no officer-general dynamic)
-
-ul generator::basicPawnMask(ul pawn){
-    ul safe = !(pawn & FILE_A);
-    return (((pawn << 7) & MAX_49) * safe);
-}
 

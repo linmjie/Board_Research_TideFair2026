@@ -5,15 +5,23 @@ int main(){
     Board board;
     ul someint = board.b_board | board.w_board;
     board::printBitBoard(someint);
-    board::printBitBoard(BLACK_ROOK);
+    board::printBitBoard(board::BLACK_ROOK);
  	ul a = 12; 
-    std::cout << "Max 49 bit: " << MAX_49 << '\n';
+    std::cout << "Max 49 bit: " << board::MAX_49 << '\n';
     
     move movie;
 	std::cout << a << '\n';
 
     board::printBitBoard(1);
-    board::printBitBoard(FILE_A);
+    board::printBitBoard(board::FILE_A);
+
+    for (int i = 0; i < 49; i++){
+        ul thing = generator::basicPawnMask(1ULL << i);
+        if (!thing){
+            std::cout << "Thing: \n";
+            board::printBitBoard(1ULL << i);
+        }
+    }
     
     return 0;
 }
