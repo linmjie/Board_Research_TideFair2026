@@ -22,11 +22,11 @@ Draw: BOTH players have made 100 moves
 white is uppercase, black is lowercase
 
 BitBoards:
-    P - 1000001     Int:  286835095896064, Hex:  0x104e000000000
+    P - 1000001     Int:  149533581377536, Hex:  0x104e000000000
         00111+2
         +7*5
     
-    R - 01001+1i    Int:  79164837199872,  Hex:  0x480000000000
+    R - 01001+1i    Int:  79164837199872,  Hex:  0x880000000000
         +7*6
 
     O - 00101+2     Int:  87960930222080,  Hex:  0x500000000000

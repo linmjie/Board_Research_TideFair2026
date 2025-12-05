@@ -21,14 +21,16 @@ constexpr ul WHITE_BOARD = WHITE_GENERAL | WHITE_OFFICER | WHITE_ROOK | WHITE_KN
 
 constexpr ul BLACK_GENERAL = 0x200000000000;
 constexpr ul BLACK_OFFICER = 0x500000000000;
-constexpr ul BLACK_ROOK = 0x480000000000;
+constexpr ul BLACK_ROOK = 0x880000000000;
 constexpr ul BLACK_KNIGHT = 0x11000000000;
 constexpr ul BLACK_PAWN = 0x104e000000000;
 constexpr ul BLACK_BOARD = BLACK_GENERAL | BLACK_OFFICER | BLACK_ROOK | BLACK_KNIGHT | BLACK_PAWN;
 
 constexpr ul FULL_BOARD = WHITE_BOARD | BLACK_BOARD;
 
-void printBitBoard(ul pos);
+namespace board{
+    void printBitBoard(ul pos);
+}
 
 class Board{
     public:
