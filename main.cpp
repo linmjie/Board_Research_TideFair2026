@@ -15,14 +15,21 @@ int main(){
     board::printBitBoard(1);
     board::printBitBoard(board::FILE_A);
 
-    for (int i = 0; i < 49; i++){
+    for (int i = 0; i < 64; i++){
         ul thing = generator::basicPawnMask(1ULL << i);
         if (!thing){
-            std::cout << "Thing: \n";
-            board::printBitBoard(1ULL << i);
+            if (i < 49){
+                std::cout << "Thing: \n";
+                board::printBitBoard(1ULL << i);
+            } else {
+                std::cout << "i: " << i << '\n';
+            }
         }
     }
-
+    std::cout << __cplusplus;
     
+    for (int i = 0; i < 49; i++){
+        board::printBitBoard(generator::basicRookMask(1ULL << i));
+    }
     return 0;
 }

@@ -7,6 +7,7 @@ using byte = unsigned char;
 namespace board {
     constexpr ul MAX_49 = ((1ULL << 49) - 1);
     constexpr ul PRE_BOARD_ONES = 0xfffe000000000000; 
+    constexpr ul FULL_BOARD = 0x1ffffffffffff;
     constexpr ul MAX_MOVES = 255; //max possible moves
     
     constexpr ul FILE_A = 0x1020408102040;
@@ -16,14 +17,16 @@ namespace board {
     constexpr ul FILE_E = 0x102040810204;
     constexpr ul FILE_F = 0x81020408102;
     constexpr ul FILE_G = 0x40810204081;
+    constexpr ul FILES[] = {FILE_G, FILE_F, FILE_E, FILE_D, FILE_C, FILE_B, FILE_A};
     
-constexpr ul RANK_1 = 0x1fc0000000000;
-constexpr ul RANK_2 = 0x3f800000000;
-constexpr ul RANK_3 = 0x7f0000000;
-constexpr ul RANK_4 = 0xfe00000;
-constexpr ul RANK_5 = 0x1fc000;
-constexpr ul RANK_6 = 0x3f80;
-constexpr ul RANK_7 = 0x7f;
+    constexpr ul RANK_1 = 0x1fc0000000000;
+    constexpr ul RANK_2 = 0x3f800000000;
+    constexpr ul RANK_3 = 0x7f0000000;
+    constexpr ul RANK_4 = 0xfe00000;
+    constexpr ul RANK_5 = 0x1fc000;
+    constexpr ul RANK_6 = 0x3f80;
+    constexpr ul RANK_7 = 0x7f;
+    constexpr ul RANKS[] = {RANK_7, RANK_6, RANK_5, RANK_4, RANK_3, RANK_2, RANK_1};
                                      
     constexpr ul WHITE_GENERAL = 0x8;
     constexpr ul WHITE_OFFICER = 0x14;
@@ -39,7 +42,7 @@ constexpr ul RANK_7 = 0x7f;
     constexpr ul BLACK_PAWN = 0x104e000000000;
     constexpr ul BLACK_BOARD = BLACK_GENERAL | BLACK_OFFICER | BLACK_ROOK | BLACK_KNIGHT | BLACK_PAWN;
     
-    constexpr ul FULL_BOARD = WHITE_BOARD | BLACK_BOARD;
+    constexpr ul STARTING_BOARD = WHITE_BOARD | BLACK_BOARD;
     
     void printBitBoard(ul pos);
 }
@@ -84,7 +87,9 @@ struct move{
 
 namespace generator{
     std::array<move, board::MAX_MOVES> moves(Board board);
+
     ul basicGeneralMask(ul general);
+    ul generalProtectionMask(ul general);
     ul basicOfficerMask(ul officer);
     ul basicRookMask(ul rook);
     ul basicKnightMask(ul knight);
