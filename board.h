@@ -17,15 +17,14 @@ namespace board {
     constexpr ul FILE_F = 0x81020408102;
     constexpr ul FILE_G = 0x40810204081;
     
-    constexpr ul RANK_1 = 0x1020408102040;
-    constexpr ul RANK_2 = 0x810204081020;
-    constexpr ul RANK_3 = 0x408102040810;
-    constexpr ul RANK_4 = 0x204081020408;
-    constexpr ul RANK_5 = 0x102040810204;
-    constexpr ul RANK_6 = 0x81020408102;
-    constexpr ul RANK_7 = 0x40810204081;
-    
-    
+constexpr ul RANK_1 = 0x1fc0000000000;
+constexpr ul RANK_2 = 0x3f800000000;
+constexpr ul RANK_3 = 0x7f0000000;
+constexpr ul RANK_4 = 0xfe00000;
+constexpr ul RANK_5 = 0x1fc000;
+constexpr ul RANK_6 = 0x3f80;
+constexpr ul RANK_7 = 0x7f;
+                                     
     constexpr ul WHITE_GENERAL = 0x8;
     constexpr ul WHITE_OFFICER = 0x14;
     constexpr ul WHITE_ROOK = 0x22;

@@ -22,6 +22,7 @@ int main(){
             board::printBitBoard(1ULL << i);
         }
     }
+
     
     return 0;
 }
