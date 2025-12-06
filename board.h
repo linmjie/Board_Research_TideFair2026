@@ -45,6 +45,7 @@ namespace board {
     constexpr ul STARTING_BOARD = WHITE_BOARD | BLACK_BOARD;
     
     void printBitBoard(ul pos);
+    void printBitBoardTransform(ul pos);
 }
 
 class Board{

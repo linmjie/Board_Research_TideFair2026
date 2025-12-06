@@ -29,7 +29,7 @@ int main(){
     std::cout << __cplusplus;
     
     for (int i = 0; i < 49; i++){
-        board::printBitBoard(generator::basicRookMask(1ULL << i));
+        board::printBitBoard(generator::basicKnightMask(1ULL << i));
     }
     return 0;
 }

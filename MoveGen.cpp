@@ -1,5 +1,4 @@
 #include"board.h"
-#include <iostream>
 
 //compute all the very basic move masks for each piece at each position
 //(no checks, no blocks, no officer-general dynamic)
@@ -29,7 +28,27 @@ ul generator::basicOfficerMask(ul officer){
 #define SHORT_L 9
 #define SHORT_RL 5
 
-//To-Do: Update to C++20 to get std::countt_zero
+/* Example board:
+ *__A_B__
+ *_C___D_
+ *___K___
+ *_E___F_
+ *__G_H__
+*/
+
+ul generator::basicKnightMask(ul knight){
+    return (((knight << TALL_L) * !(knight & board::FILE_A))                       //A
+           | ((knight << TALL_RL) * !(knight & board::FILE_G))                     //B
+           | ((knight << SHORT_L) * !(knight & (board::FILE_A | board::FILE_B)))   //C
+           | ((knight << SHORT_RL) * !(knight & (board::FILE_F | board::FILE_G)))  //D
+           | ((knight >> SHORT_RL) * !(knight & (board::FILE_A | board::FILE_B)))  //E
+           | ((knight >> SHORT_L) * !(knight & (board::FILE_F | board::FILE_G)))   //F
+           | ((knight >> TALL_RL) * !(knight & board::FILE_A))                     //G
+           | ((knight >> TALL_L) * !(knight & board::FILE_G)))                     //H
+           & board::FULL_BOARD;
+}
+
+//To-Do: Update to C++20 to get std::countr_zero
 ul generator::basicRookMask(ul rook){
     int x = __builtin_ctzll(rook) % 7;
     int y = __builtin_ctzll(rook) / 7;
