@@ -1,5 +1,6 @@
 #include<iostream>
 #include"board.h"
+#include<chrono>
 
 int main(){
     Board board;
@@ -27,9 +28,17 @@ int main(){
         }
     }
     std::cout << __cplusplus;
+
+    auto start = std::chrono::system_clock::now();
+    board::printAllPosTransforms(generator::basicGeneralMask);
+    board::printAllPosTransforms(generator::basicOfficerMask);
+    board::printAllPosTransforms(generator::basicKnightMask);
+    board::printAllPosTransforms(generator::basicRookMask);
+    board::printAllPosTransforms(generator::basicPawnMask);
+    board::printAllPosTransforms(generator::generalProtectionMask);
+    auto end = std::chrono::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
+    std::cout << "Time elapsed(ms): " << duration.count() << '\n';
     
-    for (int i = 0; i < 49; i++){
-        board::printBitBoard(generator::basicKnightMask(1ULL << i));
-    }
     return 0;
 }

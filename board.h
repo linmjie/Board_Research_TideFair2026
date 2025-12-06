@@ -1,5 +1,6 @@
 #pragma once
 #include<array>
+#include<functional>
 
 using ul = unsigned long;
 using byte = unsigned char;
@@ -43,9 +44,17 @@ namespace board {
     constexpr ul BLACK_BOARD = BLACK_GENERAL | BLACK_OFFICER | BLACK_ROOK | BLACK_KNIGHT | BLACK_PAWN;
     
     constexpr ul STARTING_BOARD = WHITE_BOARD | BLACK_BOARD;
+
+    //Second function argument is for the transformer of the pos, first function argument is for what to do with that transformed board
+    void forEachPos(std::function<void(ul, std::function<ul(ul)>)> user, std::function<ul(ul)> transformer); 
     
     void printBitBoard(ul pos);
-    void printBitBoardTransform(ul pos);
+
+    //Prints to original bitboard and transformation given transformer function
+    void printBitBoardTransform(ul pos, std::function<ul(ul)> transformer); 
+
+    //Prints all 49 single piece bitboard transformations given transformer function
+    void printAllPosTransforms(std::function<ul(ul)> transformer); 
 }
 
 class Board{
@@ -88,6 +97,7 @@ struct move{
 
 namespace generator{
     std::array<move, board::MAX_MOVES> moves(Board board);
+    void initBasicMasks();
 
     ul basicGeneralMask(ul general);
     ul generalProtectionMask(ul general);
