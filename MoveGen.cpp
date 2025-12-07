@@ -67,7 +67,6 @@ ul generator::basicKnightMask(ul knight){
            & board::FULL_BOARD;
 }
 
-//To-Do: Update to C++20 to get std::countr_zero
 ul generator::basicRookMask(ul rook){
     int zeroes = std::countr_zero(rook);
     int x = zeroes % 7;
