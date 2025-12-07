@@ -1,4 +1,20 @@
 #include"board.h"
+#include<bit>
+
+const std::array<ul, 49> board::GENERAL_MOVES = generator::initMaskArray(generator::basicGeneralMask); 
+const std::array<ul, 49> board::OFFICER_MOVES = generator::initMaskArray(generator::basicOfficerMask);
+const std::array<ul, 49> board::KNIGHT_MOVES = generator::initMaskArray(generator::basicKnightMask);
+const std::array<ul, 49> board::ROOK_MOVES = generator::initMaskArray(generator::basicRookMask);
+const std::array<ul, 49> board::PAWN_MOVES = generator::initMaskArray(generator::basicPawnMask);
+const std::array<ul, 49> board::GENERAL_FIELDS = generator::initMaskArray(generator::generalProtectionMask);
+
+std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator){
+    std::array<ul, 49> ret;
+    board::forEachPos([&ret](ul pos, auto transformer){
+            ret.at(std::countr_zero(pos)) = transformer(pos);}, 
+            maskGenerator);
+    return ret;
+}
 
 //compute all the very basic move masks for each piece at each position
 //(no checks, no blocks, no officer-general dynamic)
@@ -53,7 +69,7 @@ ul generator::basicKnightMask(ul knight){
 
 //To-Do: Update to C++20 to get std::countr_zero
 ul generator::basicRookMask(ul rook){
-    int zeroes = __builtin_ctzll(rook);
+    int zeroes = std::countr_zero(rook);
     int x = zeroes % 7;
     int y = zeroes / 7;
     return (board::FILES[x] | board::RANKS[y]) ^ rook;

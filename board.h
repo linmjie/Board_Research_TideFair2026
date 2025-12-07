@@ -45,6 +45,13 @@ namespace board {
     
     constexpr ul STARTING_BOARD = WHITE_BOARD | BLACK_BOARD;
 
+    extern const std::array<ul, 49> GENERAL_MOVES;
+    extern const std::array<ul, 49> OFFICER_MOVES;
+    extern const std::array<ul, 49> KNIGHT_MOVES;
+    extern const std::array<ul, 49> ROOK_MOVES;
+    extern const std::array<ul, 49> PAWN_MOVES;
+    extern const std::array<ul, 49> GENERAL_FIELDS;
+
     //Second function argument is for the transformer of the pos, first function argument is for what to do with that transformed board
     void forEachPos(std::function<void(ul, std::function<ul(ul)>)> user, std::function<ul(ul)> transformer); 
     
@@ -97,7 +104,9 @@ struct move{
 
 namespace generator{
     std::array<move, board::MAX_MOVES> moves(Board board);
-    void initBasicMasks();
+    
+    //Used to create initilized masks
+    std::array<ul, 49> initMaskArray(std::function<ul(ul)> maskGenerator);
 
     ul basicGeneralMask(ul general);
     ul generalProtectionMask(ul general);

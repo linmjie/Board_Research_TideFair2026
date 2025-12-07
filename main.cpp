@@ -27,15 +27,24 @@ int main(){
             }
         }
     }
-    std::cout << __cplusplus;
+    std::cout << __cplusplus << '\n';
 
     auto start = std::chrono::system_clock::now();
+    /*
     board::printAllPosTransforms(generator::basicGeneralMask);
     board::printAllPosTransforms(generator::basicOfficerMask);
     board::printAllPosTransforms(generator::basicKnightMask);
     board::printAllPosTransforms(generator::basicRookMask);
     board::printAllPosTransforms(generator::basicPawnMask);
     board::printAllPosTransforms(generator::generalProtectionMask);
+    */
+    auto testing = {board::GENERAL_MOVES, board::OFFICER_MOVES, board::KNIGHT_MOVES, board::ROOK_MOVES, board::PAWN_MOVES, board::GENERAL_FIELDS};
+    for (auto moveset: testing){
+        for (int i = 0; i < 49; i++){
+            board::printBitBoardTransform(1ULL << i,
+                    [moveset, i](auto _){return moveset[i];});
+        }
+    }
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
     std::cout << "Time elapsed(ms): " << duration.count() << '\n';
