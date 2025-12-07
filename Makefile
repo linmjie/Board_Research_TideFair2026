@@ -1,9 +1,9 @@
 CPP = g++
 FLAGS = -std=c++20
-ALL = board.o movegen.o boardutil.o 
+ALL = main.o board.o movegen.o boardutil.o 
 
 output: $(ALL) 
-	$(CPP) $(FLAGS) -o output $(ALL) main.o
+	$(CPP) $(FLAGS) -o output $(ALL)
 
 board.o: Board.cpp
 	$(CPP) $(FLAGS) -c Board.cpp -o board.o
@@ -18,4 +18,4 @@ main.o: main.cpp
 	$(CPP) $(FLAGS) -c main.cpp -o main.o
 
 clean:
-	rm output $(ALL) 
+	rm output $(ALL)
