@@ -16,10 +16,61 @@ std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator)
     return ret;
 }
 
-//compute all the very basic move masks for each piece at each position
-//(no checks, no blocks, no officer-general dynamic)
-//Need not optimize too heavily, precomputed into arrays
+//compute all the very precomputable masks for each piece at each position
+//These are precomputed into the arrays shown above
+//The basic move masks are about 2.5KB
+//The rook magic map is about ?KB
 
+ul generator::rookBlockMask(ul rook, ul fullBoard){
+    ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
+
+    //blockers at the edges(first and last files/ranks) can be taken, irrelevant to calculations
+    fullBoard &= ~(board::FILE_A | board::FILE_G | board::RANK_1 | board::RANK_2);
+
+    //gets the relevant blockers, ignores the rest of the board
+    ul blockers = fullBoard & rookMoves; 
+    
+    int x = std::countr_zero(rookMoves);
+    int y = std::countr_zero(rook) / 7;
+
+    //relevant rank and file of blockers bitboard
+    ul rank = (blockers >> (y * 7)) & board::RANK_7;
+    ul file = (blockers & board::FILES[x]) >> x;
+
+    for (int i = 0; i < 7; i++){
+        int rankBit = (rank >> i) & 1; 
+
+        if (rankBit){
+            if (rankBit < x){ //bit is left of rook
+                for (int j = 0; j < i; j++)
+                    rookMoves &= ~board::FILES[j + i];
+                break; //the left-most bit (that is right of the rook) blocks everything left of it
+                       //recall iteration goes right to left
+            } else { //bit is right of rook
+                for (int j = 0; j < i; j++)
+                    rookMoves &= ~board::FILES[i - j];
+            }
+        }
+    }
+
+    for (int i = 0; i < 7; i++){
+        int fileBit = (file >> (i * 7)) & 1;
+
+        if (fileBit){
+            if (fileBit > y){ //bit is above rook
+                for (int j = 0; j < i; j++)
+                    rookMoves &= ~board::RANKS[j + i];
+                break; //the bottom-most bit (that is above rook) blocks everything above it
+                       //recall iteration goes bottom to top
+            } else { //bit is below rook
+                for (int j = 0; j < i; j++)
+                    rookMoves &= ~board::RANKS[i - j];
+            }
+        }
+    }
+
+    return rookMoves;
+}
 ul generator::basicGeneralMask(ul general){
     return (((general << 1) * !(general & board::FILE_A)) | ((general << 7 ))
            | ((general >> 1) * !(general & board::FILE_G)) | (general >> 7) & board::FULL_BOARD);

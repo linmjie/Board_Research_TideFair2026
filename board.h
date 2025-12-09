@@ -9,7 +9,7 @@ namespace board {
     constexpr ul MAX_49 = ((1ULL << 49) - 1);
     constexpr ul PRE_BOARD_ONES = 0xfffe000000000000; 
     constexpr ul FULL_BOARD = 0x1ffffffffffff;
-    constexpr ul MAX_MOVES = 255; //max possible moves
+    constexpr ul MAX_MOVES = 255; //max possible moves, placeholder value
     
     constexpr ul FILE_A = 0x1020408102040;
     constexpr ul FILE_B = 0x810204081020;
@@ -62,6 +62,26 @@ namespace board {
 
     //Prints all 49 single piece bitboard transformations given transformer function
     void printAllPosTransforms(std::function<ul(ul)> transformer); 
+
+    enum piece{
+        w_general,
+        w_officer,
+        w_rook,
+        w_knight,
+        w_pawn,
+        
+        b_general,
+        b_officer,
+        b_rook,
+        b_knight,
+        b_pawn,
+    };
+
+    struct move{
+        board::piece piece;
+        byte origin; //An integer position, not a bitboard
+        byte destination; //An integer position, not a bitboard
+    };
 }
 
 class Board{
@@ -80,6 +100,7 @@ class Board{
         ul b_pawn;
         ul b_board;
 
+
         Board(){ //intial board at start of game
             this->w_general = board::WHITE_GENERAL;
             this->w_officer = board::WHITE_OFFICER;
@@ -93,17 +114,18 @@ class Board{
             this->b_knight = board::BLACK_KNIGHT;
             this->b_pawn = board::BLACK_PAWN;
             this->b_board = board::BLACK_BOARD;
-        } 
+        }
+
+        void makeMove(board::move move);
+    private:
+
 };
 
-//Hopefully no need to bitpack this into one byte
-struct move{
-    byte origin; //An integer position, not a bitboard
-    byte destination; //An integer position, not a bitboard
-};
 
 namespace generator{
-    std::array<move, board::MAX_MOVES> moves(Board board);
+    std::array<board::move, board::MAX_MOVES> moves(Board board);
+
+    ul rookBlockMask(ul rookMoves, ul fullBoard);
     
     //Used to create initilized masks
     std::array<ul, 49> initMaskArray(std::function<ul(ul)> maskGenerator);

@@ -10,7 +10,7 @@ int main(){
  	ul a = 12; 
     std::cout << "Max 49 bit: " << board::MAX_49 << '\n';
     
-    move movie;
+    board::move movie;
 	std::cout << a << '\n';
 
     board::printBitBoard(1);
@@ -38,6 +38,10 @@ int main(){
     board::printAllPosTransforms(generator::basicPawnMask);
     board::printAllPosTransforms(generator::generalProtectionMask);
     */
+
+    std::cout << sizeof(board::move) << '\n';
+
+    /*
     auto testing = {board::GENERAL_MOVES, board::OFFICER_MOVES, board::KNIGHT_MOVES, board::ROOK_MOVES, board::PAWN_MOVES, board::GENERAL_FIELDS};
     for (auto moveset: testing){
         for (int i = 0; i < 49; i++){
@@ -45,6 +49,8 @@ int main(){
                     [moveset, i](auto _){return moveset[i];});
         }
     }
+    */
+
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
     std::cout << "Time elapsed(ms): " << duration.count() << '\n';
