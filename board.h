@@ -42,6 +42,9 @@ namespace board {
     constexpr ul BLACK_KNIGHT = 0x11000000000;
     constexpr ul BLACK_PAWN = 0x104e000000000;
     constexpr ul BLACK_BOARD = BLACK_GENERAL | BLACK_OFFICER | BLACK_ROOK | BLACK_KNIGHT | BLACK_PAWN;
+
+    constexpr ul EDGES = FILE_A | FILE_G | RANK_1 | RANK_7;
+    constexpr ul NO_EDGES = ~EDGES;
     
     constexpr ul STARTING_BOARD = WHITE_BOARD | BLACK_BOARD;
 
@@ -125,7 +128,9 @@ class Board{
 namespace generator{
     std::array<board::move, board::MAX_MOVES> moves(Board board);
 
-    ul rookBlockMask(ul rookMoves, ul fullBoard);
+    std::array<ul, 256> rookBlocksGenerator(ul rook);
+
+    ul rookBlockMask(ul rook, ul blockers);
     
     //Used to create initilized masks
     std::array<ul, 49> initMaskArray(std::function<ul(ul)> maskGenerator);

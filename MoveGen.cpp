@@ -16,20 +16,45 @@ std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator)
     return ret;
 }
 
+std::array<ul, 256> generator::rookBlocksGenerator(ul rook){
+    //A rook move has 6+6 bits 
+    //remove four irrelevant edges gives you 8 bits(2^8 = 256)
+    std::array<ul, 256> blockMasks;
+    ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
+    rookMoves &= board::NO_EDGES;
+
+    ul bitPositions[8];
+    int backPointer = 0;
+
+    for (int i = 0; i < 49; i++){
+        if ((rookMoves >> i) & 1){
+            bitPositions[backPointer] = i;
+            backPointer++;
+        }
+    }
+
+    for (int i = 0; i < 256; i++){
+        for (int j = 0; j < 8; j++){
+            ul bit = (i >> j) & 1;
+			blockMasks[i] |= bit << bitPositions[j];
+        }
+    }
+
+    return blockMasks;
+}
+
 //compute all the very precomputable masks for each piece at each position
 //These are precomputed into the arrays shown above
 //The basic move masks are about 2.5KB
 //The rook magic map is about ?KB
 
-ul generator::rookBlockMask(ul rook, ul fullBoard){
+/*Users responsibility to give an inputted bitboard with: 
+* only bits intersecting with the rookMove, 
+* not including any edge bits
+*/
+ul generator::rookBlockMask(ul rook, ul blockers){
     ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
 
-    //blockers at the edges(first and last files/ranks) can be taken, irrelevant to calculations
-    fullBoard &= ~(board::FILE_A | board::FILE_G | board::RANK_1 | board::RANK_2);
-
-    //gets the relevant blockers, ignores the rest of the board
-    ul blockers = fullBoard & rookMoves; 
-    
     int x = std::countr_zero(rookMoves);
     int y = std::countr_zero(rook) / 7;
 

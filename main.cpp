@@ -41,7 +41,7 @@ int main(){
 
     std::cout << sizeof(board::move) << '\n';
 
-    /*
+    
     auto testing = {board::GENERAL_MOVES, board::OFFICER_MOVES, board::KNIGHT_MOVES, board::ROOK_MOVES, board::PAWN_MOVES, board::GENERAL_FIELDS};
     for (auto moveset: testing){
         for (int i = 0; i < 49; i++){
@@ -49,7 +49,7 @@ int main(){
                     [moveset, i](auto _){return moveset[i];});
         }
     }
-    */
+    
 
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);

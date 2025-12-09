@@ -20,6 +20,15 @@ def initFunction():
     print("Rows: ")
     printRows()
 
+    num = 0
+    for i in range(256):
+        for j in range(8):
+            bit = (i >> j) & 1
+            print("bit: " + str(bit))
+            num |= bit << j
+        print(num)
+        num = 0
+
 def printBoard(num: int):
     binary = bin(num).split('b')[1]
     toAdd = 49 - len(binary)
