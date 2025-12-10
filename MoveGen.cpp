@@ -1,6 +1,8 @@
 #include"board.h"
 #include<bit>
 
+#include<iostream>
+
 const std::array<ul, 49> board::GENERAL_MOVES = generator::initMaskArray(generator::basicGeneralMask); 
 const std::array<ul, 49> board::OFFICER_MOVES = generator::initMaskArray(generator::basicOfficerMask);
 const std::array<ul, 49> board::KNIGHT_MOVES = generator::initMaskArray(generator::basicKnightMask);
@@ -16,14 +18,17 @@ std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator)
     return ret;
 }
 
-std::array<ul, 256> generator::rookBlocksGenerator(ul rook){
+std::array<ul, 1023> generator::rookBlocksGenerator(ul rook){
     //A rook move has 6+6 bits 
     //remove four irrelevant edges gives you 8 bits(2^8 = 256)
-    std::array<ul, 256> blockMasks;
+    std::array<ul, 1023> blockMasks;
     ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
-    rookMoves &= board::NO_EDGES;
+    rookMoves &= ~((board::FILE_A * !(rookMoves & board::FILE_A)) | (board::FILE_G * !(rookMoves & board::FILE_G))
+                 | (board::RANK_1 * !(rookMoves & board::RANK_1)) | (board::RANK_7* !(rookMoves & board::RANK_7)));
+    rookMoves &= board::NO_CORNERS;
+    board::printBitBoard(rookMoves);
 
-    ul bitPositions[8];
+    ul bitPositions[10];
     int backPointer = 0;
 
     for (int i = 0; i < 49; i++){
@@ -32,9 +37,10 @@ std::array<ul, 256> generator::rookBlocksGenerator(ul rook){
             backPointer++;
         }
     }
-
-    for (int i = 0; i < 256; i++){
-        for (int j = 0; j < 8; j++){
+                         //
+    for (int i = 0; i < (1 << backPointer); i++){
+        for (int j = 0; j < backPointer; j++){
+            std::cout << j << '\n';
             ul bit = (i >> j) & 1;
 			blockMasks[i] |= bit << bitPositions[j];
         }

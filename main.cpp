@@ -41,7 +41,7 @@ int main(){
 
     std::cout << sizeof(board::move) << '\n';
 
-    
+    /* 
     auto testing = {board::GENERAL_MOVES, board::OFFICER_MOVES, board::KNIGHT_MOVES, board::ROOK_MOVES, board::PAWN_MOVES, board::GENERAL_FIELDS};
     for (auto moveset: testing){
         for (int i = 0; i < 49; i++){
@@ -49,11 +49,20 @@ int main(){
                     [moveset, i](auto _){return moveset[i];});
         }
     }
+    */
+    board::printBitBoard(board::NO_EDGES);
+    board::printBitBoard(board::NO_CORNERS);
     
+    std::array<ul, 1023> inp = generator::rookBlocksGenerator(1);
+    for (auto thing: inp){
+//        board::printBitBoard(thing);
+        //board::printBitBoardTransform(thing, 
+         //       [](ul th){return generator::rookBlockMask(1, th);});
+    }
 
     auto end = std::chrono::system_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
-    std::cout << "Time elapsed(ms): " << duration.count() << '\n';
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
+    std::cout << "Time elapsed(microseconds): " << duration.count() << '\n';
     
     return 0;
 }

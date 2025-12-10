@@ -45,6 +45,7 @@ namespace board {
 
     constexpr ul EDGES = FILE_A | FILE_G | RANK_1 | RANK_7;
     constexpr ul NO_EDGES = ~EDGES;
+    constexpr ul NO_CORNERS = ~( (1ULL) | (1ULL << 6) | (1ULL << 42) | (1ULL << 48));
     
     constexpr ul STARTING_BOARD = WHITE_BOARD | BLACK_BOARD;
 
@@ -128,7 +129,7 @@ class Board{
 namespace generator{
     std::array<board::move, board::MAX_MOVES> moves(Board board);
 
-    std::array<ul, 256> rookBlocksGenerator(ul rook);
+    std::array<ul, 1023> rookBlocksGenerator(ul rook);
 
     ul rookBlockMask(ul rook, ul blockers);
     
