@@ -18,17 +18,28 @@ std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator)
     return ret;
 }
 
-std::array<ul, 1023> generator::rookBlocksGenerator(ul rook){
+std::array<ul, 1024> generator::rookBlocksGenerator(ul rook){
     //A rook move has 6+6 bits 
-    //remove four irrelevant edges gives you 8 bits(2^8 = 256)
-    std::array<ul, 1023> blockMasks;
-    ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
-    rookMoves &= ~((board::FILE_A * !(rookMoves & board::FILE_A)) | (board::FILE_G * !(rookMoves & board::FILE_G))
-                 | (board::RANK_1 * !(rookMoves & board::RANK_1)) | (board::RANK_7* !(rookMoves & board::RANK_7)));
-    rookMoves &= board::NO_CORNERS;
-    board::printBitBoard(rookMoves);
+    //remove 2-4 irrelevant edges gives you 8-10 bits(2^10 = 1024)
+    std::array<ul, 1024> blockMasks = {};
+    int zeroes = std::countr_zero(rook);
+    ul rookMoves = board::ROOK_MOVES[zeroes];
 
+    rookMoves &= board::NO_CORNERS;
+
+    if (std::countl_zero(rook) % 7 != 1)
+        rookMoves &= ~board::FILE_A;
+    if (zeroes % 7 != 0)
+        rookMoves &= ~board::FILE_G;
+    if ((rook << 7) & board::FULL_BOARD)
+        rookMoves &= ~board::RANK_1;
+    if (rook >> 7 != 0)
+        rookMoves &= ~board::RANK_7;
+
+    board::printBitBoard(rookMoves);
+        
     ul bitPositions[10];
+
     int backPointer = 0;
 
     for (int i = 0; i < 49; i++){
@@ -37,12 +48,11 @@ std::array<ul, 1023> generator::rookBlocksGenerator(ul rook){
             backPointer++;
         }
     }
-                         //
+                       //2^n
     for (int i = 0; i < (1 << backPointer); i++){
         for (int j = 0; j < backPointer; j++){
-            std::cout << j << '\n';
             ul bit = (i >> j) & 1;
-			blockMasks[i] |= bit << bitPositions[j];
+			blockMasks[i] |= (bit << bitPositions[j]);
         }
     }
 
@@ -61,8 +71,10 @@ std::array<ul, 1023> generator::rookBlocksGenerator(ul rook){
 ul generator::rookBlockMask(ul rook, ul blockers){
     ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
 
-    int x = std::countr_zero(rookMoves);
+    int x = std::countr_zero(rook) % 7;
     int y = std::countr_zero(rook) / 7;
+
+    std::cout << "x: " << x << " y: " << y << '\n';
 
     //relevant rank and file of blockers bitboard
     ul rank = (blockers >> (y * 7)) & board::RANK_7;
@@ -72,9 +84,9 @@ ul generator::rookBlockMask(ul rook, ul blockers){
         int rankBit = (rank >> i) & 1; 
 
         if (rankBit){
-            if (rankBit < x){ //bit is left of rook
-                for (int j = 0; j < i; j++)
-                    rookMoves &= ~board::FILES[j + i];
+            if (rankBit > x){ //bit is left of rook
+                for (int j = 6; j > i; j--)
+                    rookMoves &= ~board::FILES[j];
                 break; //the left-most bit (that is right of the rook) blocks everything left of it
                        //recall iteration goes right to left
             } else { //bit is right of rook
@@ -89,8 +101,8 @@ ul generator::rookBlockMask(ul rook, ul blockers){
 
         if (fileBit){
             if (fileBit > y){ //bit is above rook
-                for (int j = 0; j < i; j++)
-                    rookMoves &= ~board::RANKS[j + i];
+                for (int j = 6; j > i; j--)
+                    rookMoves &= ~board::RANKS[j];
                 break; //the bottom-most bit (that is above rook) blocks everything above it
                        //recall iteration goes bottom to top
             } else { //bit is below rook

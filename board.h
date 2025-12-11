@@ -129,7 +129,7 @@ class Board{
 namespace generator{
     std::array<board::move, board::MAX_MOVES> moves(Board board);
 
-    std::array<ul, 1023> rookBlocksGenerator(ul rook);
+    std::array<ul, 1024> rookBlocksGenerator(ul rook);
 
     ul rookBlockMask(ul rook, ul blockers);
     

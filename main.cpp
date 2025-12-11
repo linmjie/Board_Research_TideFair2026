@@ -52,12 +52,13 @@ int main(){
     */
     board::printBitBoard(board::NO_EDGES);
     board::printBitBoard(board::NO_CORNERS);
+
+    ul poo = 1 << 6;
     
-    std::array<ul, 1023> inp = generator::rookBlocksGenerator(1);
+    std::array<ul, 1024> inp = generator::rookBlocksGenerator(poo);
     for (auto thing: inp){
-//        board::printBitBoard(thing);
-        //board::printBitBoardTransform(thing, 
-         //       [](ul th){return generator::rookBlockMask(1, th);});
+    //    board::printBitBoard(thing);
+        board::printBitBoardTransform(thing, [poo](ul th){return generator::rookBlockMask(poo, th);});
     }
 
     auto end = std::chrono::system_clock::now();
