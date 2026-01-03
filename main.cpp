@@ -1,11 +1,9 @@
-#include<iostream>
-#include"board.h"
-#include<chrono>
+#include <iostream>
+#include "board.h"
+#include <chrono>
 
-int main(){
+int main() {
     Board board;
-    ul someint = board.b_board | board.w_board;
-    board::printBitBoard(someint);
     board::printBitBoard(board::BLACK_ROOK);
  	ul a = 12; 
     std::cout << "Max 49 bit: " << board::MAX_49 << '\n';
@@ -16,10 +14,10 @@ int main(){
     board::printBitBoard(1);
     board::printBitBoard(board::FILE_A);
 
-    for (int i = 0; i < 64; i++){
+    for (int i = 0; i < 64; i++) {
         ul thing = generator::basicPawnMask(1ULL << i);
-        if (!thing){
-            if (i < 49){
+        if (!thing) {
+            if (i < 49) {
                 std::cout << "Thing: \n";
                 board::printBitBoard(1ULL << i);
             } else {
@@ -43,8 +41,8 @@ int main(){
 
     /* 
     auto testing = {board::GENERAL_MOVES, board::OFFICER_MOVES, board::KNIGHT_MOVES, board::ROOK_MOVES, board::PAWN_MOVES, board::GENERAL_FIELDS};
-    for (auto moveset: testing){
-        for (int i = 0; i < 49; i++){
+    for (auto moveset: testing) {
+        for (int i = 0; i < 49; i++) {
             board::printBitBoardTransform(1ULL << i,
                     [moveset, i](auto _){return moveset[i];});
         }
@@ -53,10 +51,10 @@ int main(){
     board::printBitBoard(board::NO_EDGES);
     board::printBitBoard(board::NO_CORNERS);
 
-    ul poo = 1 << 6;
+    ul poo = 1 << 17;
     
     std::array<ul, 1024> inp = generator::rookBlocksGenerator(poo);
-    for (auto thing: inp){
+    for (auto thing: inp) {
     //    board::printBitBoard(thing);
         board::printBitBoardTransform(thing, [poo](ul th){return generator::rookBlockMask(poo, th);});
     }
@@ -64,6 +62,7 @@ int main(){
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
     std::cout << "Time elapsed(microseconds): " << duration.count() << '\n';
-    
+
+    board::printBitBoard(board::FILE_G);
     return 0;
 }

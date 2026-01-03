@@ -1,6 +1,6 @@
 #pragma once
-#include<array>
-#include<functional>
+#include <array>
+#include <functional>
 
 using ul = unsigned long;
 using byte = unsigned char;
@@ -67,7 +67,7 @@ namespace board {
     //Prints all 49 single piece bitboard transformations given transformer function
     void printAllPosTransforms(std::function<ul(ul)> transformer); 
 
-    enum piece{
+    enum piece {
         w_general,
         w_officer,
         w_rook,
@@ -79,56 +79,61 @@ namespace board {
         b_rook,
         b_knight,
         b_pawn,
+        none
     };
 
-    struct move{
+    struct move {
         board::piece piece;
         byte origin; //An integer position, not a bitboard
         byte destination; //An integer position, not a bitboard
     };
+
+    ul simulateMove(ul board, move move);
 }
 
-class Board{
-    public:
-        ul w_general;
-        ul w_officer;
-        ul w_rook;
-        ul w_knight;
-        ul w_pawn;
-        ul w_board;
+class Board {
+    ul w_general;
+    ul w_officer;
+    ul w_rook;
+    ul w_knight;
+    ul w_pawn;
+    ul w_board;
         
-        ul b_general;
-        ul b_officer;
-        ul b_rook;
-        ul b_knight;
-        ul b_pawn;
-        ul b_board;
+    ul b_general;
+    ul b_officer;
+    ul b_rook;
+    ul b_knight;
+    ul b_pawn;
+    ul b_board;
 
+    std::array<board::piece, 49> pieceArray;
 
-        Board(){ //intial board at start of game
-            this->w_general = board::WHITE_GENERAL;
-            this->w_officer = board::WHITE_OFFICER;
-            this->w_rook = board::WHITE_ROOK;
-            this->w_knight = board::WHITE_KNIGHT;
-            this->w_pawn = board::WHITE_PAWN;
-            this->w_board = board::WHITE_BOARD;
-            this->b_general = board::BLACK_GENERAL;
-            this->b_officer = board::BLACK_OFFICER;
-            this->b_rook = board::BLACK_ROOK;
-            this->b_knight = board::BLACK_KNIGHT;
-            this->b_pawn = board::BLACK_PAWN;
-            this->b_board = board::BLACK_BOARD;
-        }
-
+    public:
+        Board();
         void makeMove(board::move move);
-    private:
+        ul getBitBoard(board::piece piece);
+        ul getMoveMask(int pos);
+        auto getPieces() {return pieceArray;}
 
+    protected:
+        void addBitBoardToPieceArray(board::piece piece);
 };
 
 
-namespace generator{
+namespace generator {
     std::array<board::move, board::MAX_MOVES> moves(Board board);
 
+    bool safeMove(ul general, ul fullBoard, ul opponentBoard);
+
+    /*"Super move" basically concatenates all 5 move masks (rook, general, officer, knight, and pawn), 
+    *This is used to evaluate checks, if this "super move" intersects an opponent piece, the "super" piece is checked,
+    *Special case for officer and general, evaluates move from opponents perspective(interaction field is opponenets)
+    */
+    ul superMoveMask(ul superPiece, ul fullBoard, ul opponentBoard);
+
+    ul getRookMoves(ul board, ul rook);
+
+    //Eventually used to generate magics to precompute rook stuff
     std::array<ul, 1024> rookBlocksGenerator(ul rook);
 
     ul rookBlockMask(ul rook, ul blockers);

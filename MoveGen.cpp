@@ -1,7 +1,7 @@
-#include"board.h"
-#include<bit>
+#include "board.h"
+#include <bit>
 
-#include<iostream>
+#include <iostream>
 
 const std::array<ul, 49> board::GENERAL_MOVES = generator::initMaskArray(generator::basicGeneralMask); 
 const std::array<ul, 49> board::OFFICER_MOVES = generator::initMaskArray(generator::basicOfficerMask);
@@ -10,15 +10,42 @@ const std::array<ul, 49> board::ROOK_MOVES = generator::initMaskArray(generator:
 const std::array<ul, 49> board::PAWN_MOVES = generator::initMaskArray(generator::basicPawnMask);
 const std::array<ul, 49> board::GENERAL_FIELDS = generator::initMaskArray(generator::generalProtectionMask);
 
-std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator){
+std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator) {
     std::array<ul, 49> ret;
-    board::forEachPos([&ret](ul pos, auto transformer){
+    board::forEachPos([&ret](ul pos, auto transformer) {
             ret.at(std::countr_zero(pos)) = transformer(pos);}, 
             maskGenerator);
     return ret;
 }
 
-std::array<ul, 1024> generator::rookBlocksGenerator(ul rook){
+bool generator::safeMove(ul general, ul fullBoard, ul opponentBoard) {
+    ul superMoveMask = generator::superMoveMask(general, fullBoard, opponentBoard);
+    return (superMoveMask & opponentBoard) == 0;
+}
+
+ul generator::superMoveMask(ul superPiece, ul fullBoard, ul opponentBoard) {
+    int index = std::countr_zero(superPiece);
+    ul super = board::PAWN_MOVES[index] | board::KNIGHT_MOVES[index];
+    super |= getRookMoves(superPiece, fullBoard);
+
+    //this one will be tweaked later to utilize the dynamic field from enemy, don't feel like thinking right now
+    super |= board::GENERAL_MOVES[index] | board::OFFICER_MOVES[index];
+    return super;
+}
+
+ul board::simulateMove(ul board, board::move move) {
+    ul oldPiece = 1ULL << move.origin;
+    ul newPiece = 1ULL << move.destination;
+    return (board ^ oldPiece) | newPiece;
+}
+
+ul generator::getRookMoves(ul board, ul rook) {
+    ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
+    board &= rookMoves;
+    return generator::rookBlockMask(rook, board);
+}
+
+std::array<ul, 1024> generator::rookBlocksGenerator(ul rook) {
     //A rook move has 6+6 bits 
     //remove 2-4 irrelevant edges gives you 8-10 bits(2^10 = 1024)
     std::array<ul, 1024> blockMasks = {};
@@ -38,19 +65,19 @@ std::array<ul, 1024> generator::rookBlocksGenerator(ul rook){
 
     board::printBitBoard(rookMoves);
         
-    ul bitPositions[10];
+    ul bitPositions[10] = {};
 
     int backPointer = 0;
 
-    for (int i = 0; i < 49; i++){
-        if ((rookMoves >> i) & 1){
+    for (int i = 0; i < 49; i++) {
+        if ((rookMoves >> i) & 1) {
             bitPositions[backPointer] = i;
             backPointer++;
         }
     }
                        //2^n
-    for (int i = 0; i < (1 << backPointer); i++){
-        for (int j = 0; j < backPointer; j++){
+    for (int i = 0; i < (1 << backPointer); i++) {
+        for (int j = 0; j < backPointer; j++) {
             ul bit = (i >> j) & 1;
 			blockMasks[i] |= (bit << bitPositions[j]);
         }
@@ -66,9 +93,8 @@ std::array<ul, 1024> generator::rookBlocksGenerator(ul rook){
 
 /*Users responsibility to give an inputted bitboard with: 
 * only bits intersecting with the rookMove, 
-* not including any edge bits
 */
-ul generator::rookBlockMask(ul rook, ul blockers){
+ul generator::rookBlockMask(ul rook, ul blockers) {
     ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
 
     int x = std::countr_zero(rook) % 7;
@@ -80,46 +106,46 @@ ul generator::rookBlockMask(ul rook, ul blockers){
     ul rank = (blockers >> (y * 7)) & board::RANK_7;
     ul file = (blockers & board::FILES[x]) >> x;
 
-    for (int i = 0; i < 7; i++){
+    for (int i = 0; i < 7; i++) {
         int rankBit = (rank >> i) & 1; 
 
-        if (rankBit){
-            if (rankBit > x){ //bit is left of rook
+        if (rankBit) {
+            if (i > x) { //bit is left of rook
                 for (int j = 6; j > i; j--)
                     rookMoves &= ~board::FILES[j];
-                break; //the left-most bit (that is right of the rook) blocks everything left of it
+                break; //the right-most bit (that is left of the rook) blocks everything left of it
                        //recall iteration goes right to left
-            } else { //bit is right of rook
+            } else  { //bit is right of rook
                 for (int j = 0; j < i; j++)
-                    rookMoves &= ~board::FILES[i - j];
+                    rookMoves &= ~board::FILES[j];
             }
         }
     }
 
-    for (int i = 0; i < 7; i++){
+    for (int i = 0; i < 7; i++) {
         int fileBit = (file >> (i * 7)) & 1;
 
-        if (fileBit){
-            if (fileBit > y){ //bit is above rook
+        if (fileBit) {
+            if (i > y) { //bit is above rook
                 for (int j = 6; j > i; j--)
                     rookMoves &= ~board::RANKS[j];
                 break; //the bottom-most bit (that is above rook) blocks everything above it
                        //recall iteration goes bottom to top
-            } else { //bit is below rook
+            } else  { //bit is below rook
                 for (int j = 0; j < i; j++)
-                    rookMoves &= ~board::RANKS[i - j];
+                    rookMoves &= ~board::RANKS[j];
             }
         }
     }
 
     return rookMoves;
 }
-ul generator::basicGeneralMask(ul general){
+ul generator::basicGeneralMask(ul general) {
     return (((general << 1) * !(general & board::FILE_A)) | ((general << 7 ))
-           | ((general >> 1) * !(general & board::FILE_G)) | (general >> 7) & board::FULL_BOARD);
+           | ((general >> 1) * !(general & board::FILE_G)) | ((general >> 7) & board::FULL_BOARD));
 }
 
-ul generator::generalProtectionMask(ul general){
+ul generator::generalProtectionMask(ul general) {
     ul sides = ((general << 1) * !(general & board::FILE_A))                      //Left 1
                | ((general >> 1) * !(general & board::FILE_G))                    //Right 1
                | (general << 2) * !(general & (board::FILE_A | board::FILE_B))    //Left 2
@@ -129,7 +155,7 @@ ul generator::generalProtectionMask(ul general){
            | (general << 14) | (general >> 14)) & board::FULL_BOARD;
 }
 
-ul generator::basicOfficerMask(ul officer){
+ul generator::basicOfficerMask(ul officer) {
     ul sides = ((officer << 1) * !(officer & board::FILE_A))    //Left
                | ((officer >> 1) * !(officer & board::FILE_G)); //Right
     return ((sides | (sides << 7) | (sides >> 7)
@@ -149,7 +175,7 @@ ul generator::basicOfficerMask(ul officer){
  *__G_H__
 */
 
-ul generator::basicKnightMask(ul knight){
+ul generator::basicKnightMask(ul knight) {
     return (((knight << TALL_LEFTL) * !(knight & board::FILE_A))                       //A
            | ((knight << TALL_RIGHTL) * !(knight & board::FILE_G))                     //B
            | ((knight << SHORT_LEFTL) * !(knight & (board::FILE_A | board::FILE_B)))   //C
@@ -161,13 +187,13 @@ ul generator::basicKnightMask(ul knight){
            & board::FULL_BOARD;
 }
 
-ul generator::basicRookMask(ul rook){
+ul generator::basicRookMask(ul rook) {
     int zeroes = std::countr_zero(rook);
     int x = zeroes % 7;
     int y = zeroes / 7;
     return (board::FILES[x] | board::RANKS[y]) ^ rook;
 }
 
-ul generator::basicPawnMask(ul pawn){
+ul generator::basicPawnMask(ul pawn) {
     return ((pawn << 7) * !(pawn & board::FILE_A)) & board::FULL_BOARD;
 }

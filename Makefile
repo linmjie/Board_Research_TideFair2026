@@ -1,5 +1,5 @@
 CPP = g++
-FLAGS = -std=c++20
+FLAGS = -std=c++20 -g -Wall
 ALL = main.o board.o movegen.o boardutil.o 
 
 output: $(ALL) 
