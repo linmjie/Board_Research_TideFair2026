@@ -2,3 +2,5 @@ a.out
 *.o
 output
 .DS_Store
+.idea/
+.vscode/
