@@ -1,5 +1,7 @@
 #include "board.h"
+#include <array>
 #include <bit>
+#include <cassert>
 
 #include <iostream>
 
@@ -9,6 +11,7 @@ const std::array<ul, 49> board::KNIGHT_MOVES = generator::initMaskArray(generato
 const std::array<ul, 49> board::ROOK_MOVES = generator::initMaskArray(generator::basicRookMask);
 const std::array<ul, 49> board::PAWN_MOVES = generator::initMaskArray(generator::basicPawnMask);
 const std::array<ul, 49> board::GENERAL_FIELDS = generator::initMaskArray(generator::generalProtectionMask);
+const std::array<std::array<ul, 4>, 49> board::GENERAL_MOVE_FIELDS = generator::initGeneralMovesFields(generator::generalMovesFieldsGenerator);
 
 std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator) {
     std::array<ul, 49> ret;
@@ -18,15 +21,78 @@ std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator)
     return ret;
 }
 
-bool generator::safeMove(ul general, ul fullBoard, ul opponentBoard) {
-    ul superMoveMask = generator::superMoveMask(general, fullBoard, opponentBoard);
-    return (superMoveMask & opponentBoard) == 0;
+std::array<std::array<ul, 4>, 49> generator::initGeneralMovesFields(std::function<std::array<ul, 4>(ul)> maskGenerator) {
+    std::array<std::array<ul, 4>, 49> ret;
+    for (int i = 0; i < 49; i++) {
+        ul board = 1ULL << i;
+        ret[i] = maskGenerator(board);
+    }
+    return ret;
 }
 
-ul generator::superMoveMask(ul superPiece, ul fullBoard, ul opponentBoard) {
+//Completely untested right now, prayers it works first try..
+bool generator::safeMove(const Board *board, int dest, bool sideIsWhite) {
+    //There may be a cleaner way to do this...
+    ul fullBoard = board->full_board;
+    ul general;
+    ul opponentBoard;
+    ul oppPawns;
+    ul oppKnights;
+    ul oppRooks;
+    ul oppOfficers;
+    ul oppGeneral;
+
+    if (sideIsWhite) {
+        general = board->w_general;
+        opponentBoard = board->b_board;
+        oppPawns = board->b_pawn;
+        oppKnights = board->b_knight;
+        oppRooks = board->b_rook;
+        oppOfficers = board->b_officer;
+        oppGeneral = board->b_general;
+    } else {
+        general = board->b_general;
+        opponentBoard = board->w_board;
+        oppPawns = board->w_pawn;
+        oppKnights = board->w_knight;
+        oppRooks = board->w_rook;
+        oppOfficers = board->w_officer;
+        oppGeneral = board->w_general;
+    }
+
+    //Check pawn, knight, rook, and officer/general moves to validate
+    ul intersects = 0;
+    intersects |= oppPawns & board::PAWN_MOVES[dest];
+    intersects |= oppKnights & board::KNIGHT_MOVES[dest];
+    intersects |= oppRooks & generator::getRookMoves(fullBoard, dest);
+
+    //Special case for generals and officers because of the field dynamic
+    //I think this could be magic'ed like rook blockers
+    int oppGeneralPos = std::countr_zero(oppGeneral);
+    ul oppField = board::GENERAL_FIELDS[oppGeneralPos];
+    ul oppGeneralMove = board::GENERAL_MOVES[dest];
+    for (int i = 0; i < 49; i++) {
+        int bit = (oppGeneralMove << i) & 1;
+        if (bit) {
+            ul localField = board::GENERAL_FIELDS[i];
+            //Invalid king move
+            if ((localField | oppOfficers) != localField) {
+                //Eliminate bit
+                oppGeneralMove ^= 1ULL << i;
+            }
+        }
+    }
+    intersects |= oppGeneral & oppGeneralMove;
+    intersects |= oppOfficers & (board::OFFICER_MOVES[dest] & oppField);
+
+    return intersects == 0;
+}
+
+//I don't think this is useful anymore, I'll keep it just in case it will be
+ul generator::superMoveMask(ul superPiece, ul fullBoard, ul opponentBoard, ul oppOfficers, ul oppGeneral) {
     int index = std::countr_zero(superPiece);
     ul super = board::PAWN_MOVES[index] | board::KNIGHT_MOVES[index];
-    super |= getRookMoves(superPiece, fullBoard);
+    super |= getRookMoves(fullBoard, index);
 
     //this one will be tweaked later to utilize the dynamic field from enemy, don't feel like thinking right now
     super |= board::GENERAL_MOVES[index] | board::OFFICER_MOVES[index];
@@ -39,10 +105,10 @@ ul board::simulateMove(ul board, board::move move) {
     return (board ^ oldPiece) | newPiece;
 }
 
-ul generator::getRookMoves(ul board, ul rook) {
-    ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
+ul generator::getRookMoves(ul board, int pos) {
+    ul rookMoves = board::ROOK_MOVES[pos];
     board &= rookMoves;
-    return generator::rookBlockMask(rook, board);
+    return generator::rookBlockMask(pos, board);
 }
 
 std::array<ul, 1024> generator::rookBlocksGenerator(ul rook) {
@@ -153,6 +219,22 @@ ul generator::generalProtectionMask(ul general) {
     return (sides | (sides >> 14) | (sides >> 7) | (sides << 7) | (sides << 14)
            | (general << 7) | (general >> 7)
            | (general << 14) | (general >> 14)) & board::FULL_BOARD;
+}
+
+std::array<ul, 4> generator::generalMovesFieldsGenerator(ul general) {
+    std::array<ul, 4> ret = {};
+    int generalPos = std::countr_zero(general);
+    ul generalMoves = board::GENERAL_MOVES[generalPos];
+    int retCounter = 0;
+    for (int i = 0; i < 49; i++) {
+        int bit = (generalMoves << i) & 1;
+        if (bit) {
+            assert(retCounter < 4);
+            ret[retCounter] = board::GENERAL_FIELDS[i];
+            retCounter++;
+        }
+    }
+    return ret; 
 }
 
 ul generator::basicOfficerMask(ul officer) {

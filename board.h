@@ -2,7 +2,7 @@
 #include <array>
 #include <functional>
 
-using ul = unsigned long;
+using ul = unsigned long long;
 using byte = unsigned char;
 
 namespace board {
@@ -55,6 +55,7 @@ namespace board {
     extern const std::array<ul, 49> ROOK_MOVES;
     extern const std::array<ul, 49> PAWN_MOVES;
     extern const std::array<ul, 49> GENERAL_FIELDS;
+    extern const std::array<std::array<ul, 4>, 49> GENERAL_MOVE_FIELDS;
 
     //Second function argument is for the transformer of the pos, first function argument is for what to do with that transformed board
     void forEachPos(std::function<void(ul, std::function<ul(ul)>)> user, std::function<ul(ul)> transformer); 
@@ -66,6 +67,11 @@ namespace board {
 
     //Prints all 49 single piece bitboard transformations given transformer function
     void printAllPosTransforms(std::function<ul(ul)> transformer); 
+
+    enum side {
+        white,
+        black
+    };
 
     enum piece {
         w_general,
@@ -82,6 +88,7 @@ namespace board {
         none
     };
 
+
     struct move {
         board::piece piece;
         byte origin; //An integer position, not a bitboard
@@ -92,24 +99,27 @@ namespace board {
 }
 
 class Board {
-    ul w_general;
-    ul w_officer;
-    ul w_rook;
-    ul w_knight;
-    ul w_pawn;
-    ul w_board;
-        
-    ul b_general;
-    ul b_officer;
-    ul b_rook;
-    ul b_knight;
-    ul b_pawn;
-    ul b_board;
-
     std::array<board::piece, 49> pieceArray;
 
-    public:
+    public:    
+        ul w_general;
+        ul w_officer;
+        ul w_rook;
+        ul w_knight;
+        ul w_pawn;
+        ul w_board;
+            
+        ul b_general;
+        ul b_officer;
+        ul b_rook;
+        ul b_knight;
+        ul b_pawn;
+        ul b_board;
+
+        ul full_board;
+
         Board();
+
         void makeMove(board::move move);
         ul getBitBoard(board::piece piece);
         ul getMoveMask(int pos);
@@ -119,19 +129,61 @@ class Board {
         void addBitBoardToPieceArray(board::piece piece);
 };
 
+namespace board {
+    namespace pieces {
+        namespace w_general {
+            ul getMoveMask(const Board *board, int pos);
+        }
+
+        namespace w_officer {
+            ul getMoveMask(const Board *board, int pos);
+        }
+        
+        namespace w_rook {
+            ul getMoveMask(const Board *board, int pos);
+        }
+
+        namespace w_knight {
+            ul getMoveMask(const Board *board, int pos);
+        }
+
+        namespace w_pawn {
+            ul getMoveMask(const Board *board, int pos);
+        }
+
+        namespace b_general {
+            ul getMoveMask(const Board *board, int pos);
+        }
+        namespace b_officer {
+            ul getMoveMask(const Board *board, int pos);
+        }
+
+        namespace b_rook {
+            ul getMoveMask(const Board *board, int pos);
+        }
+
+        namespace b_knight {
+            ul getMoveMask(const Board *board, int pos);
+        }
+
+        namespace b_pawn {
+            ul getMoveMask(const Board *board, int pos);
+        }
+    }
+}
 
 namespace generator {
     std::array<board::move, board::MAX_MOVES> moves(Board board);
 
-    bool safeMove(ul general, ul fullBoard, ul opponentBoard);
+    bool safeMove(const Board *board, int dest, bool sideIsWhite);
 
     /*"Super move" basically concatenates all 5 move masks (rook, general, officer, knight, and pawn), 
     *This is used to evaluate checks, if this "super move" intersects an opponent piece, the "super" piece is checked,
     *Special case for officer and general, evaluates move from opponents perspective(interaction field is opponenets)
     */
-    ul superMoveMask(ul superPiece, ul fullBoard, ul opponentBoard);
+    ul superMoveMask(ul superPiece, ul fullBoard, ul opponentBoard, ul oppOfficers, ul oppGeneral);
 
-    ul getRookMoves(ul board, ul rook);
+    ul getRookMoves(ul board, int rook);
 
     //Eventually used to generate magics to precompute rook stuff
     std::array<ul, 1024> rookBlocksGenerator(ul rook);
@@ -140,7 +192,10 @@ namespace generator {
     
     //Used to create initilized masks
     std::array<ul, 49> initMaskArray(std::function<ul(ul)> maskGenerator);
+    std::array<std::array<ul, 4>, 49> initGeneralMovesFields(std::function<std::array<ul, 4>(ul)> maskGenerator);
 
+    //For the four possible general moves, generates the general fields for them
+    std::array<ul, 4> generalMovesFieldsGenerator(ul general);
     ul basicGeneralMask(ul general);
     ul generalProtectionMask(ul general);
     ul basicOfficerMask(ul officer);
