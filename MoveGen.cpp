@@ -31,10 +31,9 @@ std::array<std::array<ul, 4>, 49> generator::initGeneralMovesFields(std::functio
 }
 
 //Completely untested right now, prayers it works first try..
-bool generator::safeMove(const Board *board, int dest, bool sideIsWhite) {
+bool generator::isAttacked(const Board *board, int pos, bool sideIsWhite) {
     //There may be a cleaner way to do this...
     ul fullBoard = board->full_board;
-    ul general;
     ul opponentBoard;
     ul oppPawns;
     ul oppKnights;
@@ -43,7 +42,6 @@ bool generator::safeMove(const Board *board, int dest, bool sideIsWhite) {
     ul oppGeneral;
 
     if (sideIsWhite) {
-        general = board->w_general;
         opponentBoard = board->b_board;
         oppPawns = board->b_pawn;
         oppKnights = board->b_knight;
@@ -51,7 +49,6 @@ bool generator::safeMove(const Board *board, int dest, bool sideIsWhite) {
         oppOfficers = board->b_officer;
         oppGeneral = board->b_general;
     } else {
-        general = board->b_general;
         opponentBoard = board->w_board;
         oppPawns = board->w_pawn;
         oppKnights = board->w_knight;
@@ -62,15 +59,15 @@ bool generator::safeMove(const Board *board, int dest, bool sideIsWhite) {
 
     //Check pawn, knight, rook, and officer/general moves to validate
     ul intersects = 0;
-    intersects |= oppPawns & board::PAWN_MOVES[dest];
-    intersects |= oppKnights & board::KNIGHT_MOVES[dest];
-    intersects |= oppRooks & generator::getRookMoves(fullBoard, dest);
+    intersects |= oppPawns & board::PAWN_MOVES[pos];
+    intersects |= oppKnights & board::KNIGHT_MOVES[pos];
+    intersects |= oppRooks & generator::getRookMoves(fullBoard, pos);
 
     //Special case for generals and officers because of the field dynamic
     //I think this could be magic'ed like rook blockers
     int oppGeneralPos = std::countr_zero(oppGeneral);
     ul oppField = board::GENERAL_FIELDS[oppGeneralPos];
-    ul oppGeneralMove = board::GENERAL_MOVES[dest];
+    ul oppGeneralMove = board::GENERAL_MOVES[pos];
     for (int i = 0; i < 49; i++) {
         int bit = (oppGeneralMove << i) & 1;
         if (bit) {
@@ -83,9 +80,9 @@ bool generator::safeMove(const Board *board, int dest, bool sideIsWhite) {
         }
     }
     intersects |= oppGeneral & oppGeneralMove;
-    intersects |= oppOfficers & (board::OFFICER_MOVES[dest] & oppField);
+    intersects |= oppOfficers & (board::OFFICER_MOVES[pos] & oppField);
 
-    return intersects == 0;
+    return intersects;
 }
 
 //I don't think this is useful anymore, I'll keep it just in case it will be

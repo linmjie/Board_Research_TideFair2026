@@ -46,16 +46,16 @@ ul Board::getMoveMask(int pos) {
 
     piece piece = this->pieceArray[pos];
     switch (piece) {
-        case board::w_general: return pieces::w_general::getMoveMask(this, pos);
-        case board::w_officer: return pieces::w_officer::getMoveMask(this, pos);
-        case board::w_rook: return pieces::w_rook::getMoveMask(this, pos);
-        case board::w_knight: return pieces::w_knight::getMoveMask(this, pos);
-        case board::w_pawn: return pieces::w_pawn::getMoveMask(this, pos);
-        case board::b_general: return pieces::b_general::getMoveMask(this, pos);
-        case board::b_officer: return pieces::b_officer::getMoveMask(this, pos);
-        case board::b_rook: return pieces::b_rook::getMoveMask(this, pos);
-        case board::b_knight: return pieces::b_knight::getMoveMask(this, pos);
-        case board::b_pawn: return pieces::b_pawn::getMoveMask(this, pos);
+        case board::w_general: return pieces::w_general::getMoveMask(this, piece, pos);
+        case board::w_officer: return pieces::w_officer::getMoveMask(this, piece, pos);
+        case board::w_rook: return pieces::w_rook::getMoveMask(this, piece, pos);
+        case board::w_knight: return pieces::w_knight::getMoveMask(this, piece, pos);
+        case board::w_pawn: return pieces::w_pawn::getMoveMask(this, piece, pos);
+        case board::b_general: return pieces::b_general::getMoveMask(this, piece, pos);
+        case board::b_officer: return pieces::b_officer::getMoveMask(this, piece, pos);
+        case board::b_rook: return pieces::b_rook::getMoveMask(this, piece, pos);
+        case board::b_knight: return pieces::b_knight::getMoveMask(this, piece, pos);
+        case board::b_pawn: return pieces::b_pawn::getMoveMask(this, piece, pos);
         case board::none: return 0; //Empty move bitboard
     }
     assert(false);
@@ -135,12 +135,14 @@ void Board::makeMove(board::move move) {
 }
 
 //Removes illegal moves that result in general's vulnerability
-ul getCheckCleanedBoard(const Board *board, ul dirtyBoard, bool sideIsWhite) {
+ul getCheckCleanedBoard(const Board *board, board::piece piece, int origin, ul dirtyBoard, bool sideIsWhite) {
     ul cleanedBoard = dirtyBoard;
     for (int i = 0; i < 49; i++) {
         int bit = (dirtyBoard << i) & 1;
+        Board simulatedBoard(*board);
+        simulatedBoard.makeMove(board::move(piece, origin, i));
         if (bit) {
-            if (!generator::safeMove(board, i, sideIsWhite)) {
+            if (generator::isAttacked(&simulatedBoard, origin, sideIsWhite)) {
                 cleanedBoard ^= 1ULL << i;
             }
         }
@@ -152,7 +154,7 @@ ul getCheckCleanedBoard(const Board *board, ul dirtyBoard, bool sideIsWhite) {
 //Eventually...
 namespace board {
     namespace pieces {
-        ul getGeneralMoveMask(const Board *board, int pos, bool sideIsWhite) {
+        ul getGeneralMoveMask(const Board *board, board::piece piece, int pos, bool sideIsWhite) {
             ul move = board::GENERAL_MOVES[pos];
             for (int i = 0; i < 49; i++) {
                 int bit = (move << i) & 1;
@@ -165,86 +167,84 @@ namespace board {
                     }
                 }
             }
-            return getCheckCleanedBoard(board, move, sideIsWhite);
-        }
-
-        ul getRookMoveMask(const Board *board, int pos, bool sideisWhite) {
-            ul move = board::ROOK_MOVES[pos];
-            generator::getRookMoves(board->full_board, pos);
-            return getCheckCleanedBoard(board, move, sideisWhite);
+            return getCheckCleanedBoard(board, piece, pos, move, sideIsWhite);
         }
 
         namespace w_general {
-            ul getMoveMask(const Board *board, int pos) {
-                return getGeneralMoveMask(board, pos, true);
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
+                return getGeneralMoveMask(board, piece, pos, true);
             }
         }
 
         namespace w_officer {
-            ul getMoveMask(const Board *board, int pos) {
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::OFFICER_MOVES[pos];
                 int genPos = std::countr_zero(board->w_general);
                 assert(genPos <= board::GENERAL_FIELDS.size());
                 ul field = board::GENERAL_FIELDS[genPos];
                 move &= field;
-                return getCheckCleanedBoard(board, move, true);
+                return getCheckCleanedBoard(board, piece, pos, move, true);
             }
         }
         
         namespace w_rook {
-            ul getMoveMask(const Board *board, int pos) {
-                return getRookMoveMask(board, pos, true);
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
+                ul move = board::ROOK_MOVES[pos];
+                generator::getRookMoves(board->full_board, pos);
+                return getCheckCleanedBoard(board, piece, pos, move, true);
             }
         }
 
         namespace w_knight {
-            ul getMoveMask(const Board *board, int pos) {
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::KNIGHT_MOVES[pos];
-                return getCheckCleanedBoard(board, move, true);
+                return getCheckCleanedBoard(board, piece, pos, move, true);
             }
         }
 
         namespace w_pawn {
-            ul getMoveMask(const Board *board, int pos) {
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::PAWN_MOVES[pos];
-                return getCheckCleanedBoard(board, move, true);
+                return getCheckCleanedBoard(board, piece, pos, move, true);
             }
         }
 
         namespace b_general {
-            ul getMoveMask(const Board *board, int pos) {
-                return getGeneralMoveMask(board, pos, false);
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
+                return getGeneralMoveMask(board, piece, pos, false);
             }
         }
 
         namespace b_officer {
-            ul getMoveMask(const Board *board, int pos) {
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::OFFICER_MOVES[pos];
                 int genPos = std::countr_zero(board->b_general);
                 assert(genPos <= board::GENERAL_FIELDS.size());
                 ul field = board::GENERAL_FIELDS[genPos];
                 move &= field;
-                return getCheckCleanedBoard(board, move, false);
+                return getCheckCleanedBoard(board, piece, pos, move, false);
             }
         }
 
         namespace b_rook {
-            ul getMoveMask(const Board *board, int pos) {
-                return getRookMoveMask(board, pos, false);
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
+                ul move = board::ROOK_MOVES[pos];
+                generator::getRookMoves(board->full_board, pos);
+                return getCheckCleanedBoard(board, piece, pos, move, false);
             }
         }
 
         namespace b_knight {
-            ul getMoveMask(const Board *board, int pos) {
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::KNIGHT_MOVES[pos];
-                return getCheckCleanedBoard(board, move, false);
+                return getCheckCleanedBoard(board, piece, pos, move, false);
             }
         }
 
         namespace b_pawn {
-            ul getMoveMask(const Board *board, int pos) {
+            ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::PAWN_MOVES[pos];
-                return getCheckCleanedBoard(board, move, false);
+                return getCheckCleanedBoard(board, piece, pos, move, false);
             }
         }
     }
