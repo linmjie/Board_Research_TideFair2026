@@ -4,7 +4,14 @@
 
 int main() {
     Board board;
-    board::printBitBoard(board::BLACK_ROOK);
+    board::printBitBoard(10616840);
+    for (int i = 0; i < 49; i++) {
+        int bit = (10616840ULL >> i) & 1;
+        if (bit) {
+            std::cout << "i: " << i << '\n';
+        }
+    }
+
  	ul a = 12; 
     std::cout << "Max 49 bit: " << board::MAX_49 << '\n';
     

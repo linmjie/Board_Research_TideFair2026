@@ -34,7 +34,7 @@ Board::Board() { //intial board at start of game
 }
 
 void Board::addBitBoardToPieceArray(board::piece piece) {
-    for (int i = 0; i < 48; i++) {
+    for (int i = 0; i < 49; i++) {
         int bit = (getBitBoard(piece) >> i) & 1;
         if (bit)
             pieceArray[i] = piece;
