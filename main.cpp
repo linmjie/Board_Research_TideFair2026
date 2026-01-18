@@ -4,13 +4,6 @@
 
 int main() {
     Board board;
-    board::printBitBoard(10616840);
-    for (int i = 0; i < 49; i++) {
-        int bit = (10616840ULL >> i) & 1;
-        if (bit) {
-            std::cout << "i: " << i << '\n';
-        }
-    }
 
  	ul a = 12; 
     std::cout << "Max 49 bit: " << board::MAX_49 << '\n';
@@ -46,7 +39,7 @@ int main() {
 
     std::cout << sizeof(board::move) << '\n';
 
-    /* 
+     
     auto testing = {board::GENERAL_MOVES, board::OFFICER_MOVES, board::KNIGHT_MOVES, board::ROOK_MOVES, board::PAWN_MOVES, board::GENERAL_FIELDS};
     for (auto moveset: testing) {
         for (int i = 0; i < 49; i++) {
@@ -54,7 +47,8 @@ int main() {
                     [moveset, i](auto _){return moveset[i];});
         }
     }
-    */
+    
+    std::cout << "lksdhgklahslkdghashdf" << '\n';
     board::printBitBoard(board::NO_EDGES);
     board::printBitBoard(board::NO_CORNERS);
 

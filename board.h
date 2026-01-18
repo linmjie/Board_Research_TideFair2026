@@ -54,6 +54,7 @@ namespace board {
     extern const std::array<ul, 49> KNIGHT_MOVES;
     extern const std::array<ul, 49> ROOK_MOVES;
     extern const std::array<ul, 49> PAWN_MOVES;
+    extern const std::array<ul, 49> BLACK_PAWN_MOVES;
     extern const std::array<ul, 49> GENERAL_FIELDS;
     extern const std::array<std::array<ul, 4>, 49> GENERAL_MOVE_FIELDS;
 
@@ -202,4 +203,5 @@ namespace generator {
     ul basicRookMask(ul rook);
     ul basicKnightMask(ul knight);
     ul basicPawnMask(ul pawn);
+    ul basicBlackPawnMask(ul pawn);
 }

@@ -10,6 +10,7 @@ const std::array<ul, 49> board::OFFICER_MOVES = generator::initMaskArray(generat
 const std::array<ul, 49> board::KNIGHT_MOVES = generator::initMaskArray(generator::basicKnightMask);
 const std::array<ul, 49> board::ROOK_MOVES = generator::initMaskArray(generator::basicRookMask);
 const std::array<ul, 49> board::PAWN_MOVES = generator::initMaskArray(generator::basicPawnMask);
+const std::array<ul, 49> board::BLACK_PAWN_MOVES = generator::initMaskArray(generator::basicBlackPawnMask);
 const std::array<ul, 49> board::GENERAL_FIELDS = generator::initMaskArray(generator::generalProtectionMask);
 const std::array<std::array<ul, 4>, 49> board::GENERAL_MOVE_FIELDS = generator::initGeneralMovesFields(generator::generalMovesFieldsGenerator);
 
@@ -40,6 +41,7 @@ bool generator::isAttacked(const Board *board, int pos, bool sideIsWhite) {
     ul oppRooks;
     ul oppOfficers;
     ul oppGeneral;
+    ul pawnMoveMask;
 
     if (sideIsWhite) {
         opponentBoard = board->b_board;
@@ -48,6 +50,7 @@ bool generator::isAttacked(const Board *board, int pos, bool sideIsWhite) {
         oppRooks = board->b_rook;
         oppOfficers = board->b_officer;
         oppGeneral = board->b_general;
+        pawnMoveMask = board::PAWN_MOVES[pos];
     } else {
         opponentBoard = board->w_board;
         oppPawns = board->w_pawn;
@@ -55,11 +58,12 @@ bool generator::isAttacked(const Board *board, int pos, bool sideIsWhite) {
         oppRooks = board->w_rook;
         oppOfficers = board->w_officer;
         oppGeneral = board->w_general;
+        pawnMoveMask = board::BLACK_PAWN_MOVES[pos];
     }
 
     //Check pawn, knight, rook, and officer/general moves to validate
     ul intersects = 0;
-    intersects |= oppPawns & board::PAWN_MOVES[pos];
+    intersects |= oppPawns & pawnMoveMask;
     intersects |= oppKnights & board::KNIGHT_MOVES[pos];
     intersects |= oppRooks & generator::getRookMoves(fullBoard, pos);
 
@@ -82,7 +86,7 @@ bool generator::isAttacked(const Board *board, int pos, bool sideIsWhite) {
     intersects |= oppGeneral & oppGeneralMove;
     intersects |= oppOfficers & (board::OFFICER_MOVES[pos] & oppField);
 
-    return intersects;
+    return static_cast<bool>(intersects);
 }
 
 //I don't think this is useful anymore, I'll keep it just in case it will be
@@ -104,8 +108,9 @@ ul board::simulateMove(ul board, board::move move) {
 
 ul generator::getRookMoves(ul board, int pos) {
     ul rookMoves = board::ROOK_MOVES[pos];
+    ul rook = 1ULL << pos;
     board &= rookMoves;
-    return generator::rookBlockMask(pos, board);
+    return generator::rookBlockMask(rook, board);
 }
 
 std::array<ul, 1024> generator::rookBlocksGenerator(ul rook) {
@@ -275,4 +280,8 @@ ul generator::basicRookMask(ul rook) {
 
 ul generator::basicPawnMask(ul pawn) {
     return ((pawn << 7) * !(pawn & board::FILE_A)) & board::FULL_BOARD;
+}
+
+ul generator::basicBlackPawnMask(ul pawn) {
+    return pawn >> 7;
 }

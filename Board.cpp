@@ -1,4 +1,5 @@
 #include "board.h"
+#include <bit>
 #include <cassert>
 #include <stdexcept>
 
@@ -137,21 +138,34 @@ void Board::makeMove(board::move move) {
 //Removes illegal moves that result in general's vulnerability
 ul getCheckCleanedBoard(const Board *board, board::piece piece, int origin, ul dirtyBoard, bool sideIsWhite) {
     ul cleanedBoard = dirtyBoard;
+    int generalPos;
+    if (sideIsWhite)
+        generalPos = std::countr_zero(board->w_general);
+    else 
+        generalPos = std::countr_zero(board->b_general);
+
     for (int i = 0; i < 49; i++) {
         int bit = (dirtyBoard << i) & 1;
         Board simulatedBoard(*board);
-        simulatedBoard.makeMove(board::move(piece, origin, i));
+        board::move move = {piece, static_cast<byte>(origin), static_cast<byte>(i)};
+        simulatedBoard.makeMove(move);
         if (bit) {
-            if (generator::isAttacked(&simulatedBoard, origin, sideIsWhite)) {
+            if (generator::isAttacked(&simulatedBoard, generalPos, sideIsWhite)) {
                 cleanedBoard ^= 1ULL << i;
             }
         }
     }
     assert(cleanedBoard <= dirtyBoard);
-    return cleanedBoard;
+
+    ul alliedBoard;
+    if (sideIsWhite) {
+        alliedBoard = board->w_board;
+    } else {
+        alliedBoard = board->b_board;
+    }
+    return cleanedBoard & ~alliedBoard;
 }
 
-//Eventually...
 namespace board {
     namespace pieces {
         ul getGeneralMoveMask(const Board *board, board::piece piece, int pos, bool sideIsWhite) {
@@ -189,8 +203,7 @@ namespace board {
         
         namespace w_rook {
             ul getMoveMask(const Board *board, board::piece piece, int pos) {
-                ul move = board::ROOK_MOVES[pos];
-                generator::getRookMoves(board->full_board, pos);
+                ul move = generator::getRookMoves(board->full_board, pos);
                 return getCheckCleanedBoard(board, piece, pos, move, true);
             }
         }
@@ -228,8 +241,7 @@ namespace board {
 
         namespace b_rook {
             ul getMoveMask(const Board *board, board::piece piece, int pos) {
-                ul move = board::ROOK_MOVES[pos];
-                generator::getRookMoves(board->full_board, pos);
+                ul move = generator::getRookMoves(board->full_board, pos);
                 return getCheckCleanedBoard(board, piece, pos, move, false);
             }
         }
@@ -243,7 +255,7 @@ namespace board {
 
         namespace b_pawn {
             ul getMoveMask(const Board *board, board::piece piece, int pos) {
-                ul move = board::PAWN_MOVES[pos];
+                ul move = board::BLACK_PAWN_MOVES[pos];
                 return getCheckCleanedBoard(board, piece, pos, move, false);
             }
         }
