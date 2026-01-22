@@ -187,7 +187,7 @@ namespace generator {
     ul getRookMoves(ul board, int rook);
 
     //Eventually used to generate magics to precompute rook stuff
-    std::array<ul, 1024> rookBlocksGenerator(ul rook);
+    std::vector<ul> rookBlocksGenerator(ul rook);
 
     ul rookBlockMask(ul rook, ul blockers);
     

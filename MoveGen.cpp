@@ -31,17 +31,11 @@ std::array<std::array<ul, 4>, 49> generator::initGeneralMovesFields(std::functio
     return ret;
 }
 
-//Completely untested right now, prayers it works first try..
+//Farrr to many permutations to magic
 bool generator::isAttacked(const Board *board, int pos, bool sideIsWhite) {
     //There may be a cleaner way to do this...
     ul fullBoard = board->full_board;
-    ul opponentBoard;
-    ul oppPawns;
-    ul oppKnights;
-    ul oppRooks;
-    ul oppOfficers;
-    ul oppGeneral;
-    ul pawnMoveMask;
+    ul opponentBoard, oppPawns, oppKnights, oppRooks, oppOfficers, oppGeneral, pawnMoveMask;
 
     if (sideIsWhite) {
         opponentBoard = board->b_board;
@@ -113,27 +107,15 @@ ul generator::getRookMoves(ul board, int pos) {
     return generator::rookBlockMask(rook, board);
 }
 
-std::array<ul, 1024> generator::rookBlocksGenerator(ul rook) {
-    //A rook move has 6+6 bits 
-    //remove 2-4 irrelevant edges gives you 8-10 bits(2^10 = 1024)
-    std::array<ul, 1024> blockMasks = {};
+std::vector<ul> generator::rookBlocksGenerator(ul rook) {
     int zeroes = std::countr_zero(rook);
     ul rookMoves = board::ROOK_MOVES[zeroes];
 
     rookMoves &= board::NO_CORNERS;
 
-    if (std::countl_zero(rook) % 7 != 1)
-        rookMoves &= ~board::FILE_A;
-    if (zeroes % 7 != 0)
-        rookMoves &= ~board::FILE_G;
-    if ((rook << 7) & board::FULL_BOARD)
-        rookMoves &= ~board::RANK_1;
-    if (rook >> 7 != 0)
-        rookMoves &= ~board::RANK_7;
-
-    board::printBitBoard(rookMoves);
+    //board::printBitBoard(rookMoves);
         
-    ul bitPositions[10] = {};
+    int bitPositions[12] = {};
 
     int backPointer = 0;
 
@@ -143,11 +125,21 @@ std::array<ul, 1024> generator::rookBlocksGenerator(ul rook) {
             backPointer++;
         }
     }
+    int bitPermutations = 1 << backPointer;
+    assert(backPointer <= 12);
+    assert(bitPermutations <= (1 << backPointer));
+
+    //A rook move has 6+6 bits 
+    //removing corners gives you 10-12 bits(2^10 = 1024)
+    //Removing the sides is too much of a runtime trade off,
+    //Though it could lead up 4x memory saves (more robust magic generator would ignore)
+    //See board.txt for max memory usages
+    std::vector<ul> blockMasks(bitPermutations);
                        //2^n
     for (int i = 0; i < (1 << backPointer); i++) {
         for (int j = 0; j < backPointer; j++) {
-            ul bit = (i >> j) & 1;
-			blockMasks[i] |= (bit << bitPositions[j]);
+            int bit = (i >> j) & 1;
+			blockMasks.at(i) |= (bit << bitPositions[j]);
         }
     }
 

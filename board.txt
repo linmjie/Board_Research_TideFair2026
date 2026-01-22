@@ -60,3 +60,26 @@ BitBoards:
     | (or operator) concatenates boards
     & (and operator) makes board of overlap
     ^ (xor operator) concatenates but removes overlap
+
+MAGICS FOR ROOKS:
+    12-bit -> 2^12 * 8 = 32768 bytes
+    11-bit -> 2^11 * 8 = 16384 bytes
+    10-bit -> 2^10 * 8 = 8192  bytes
+
+    How many squares occupy each of these bit combos?
+    * 10-bit -> only on the corners -> 4 squares
+    * 11-bit -> only on the edges (excluding corners) -> 20 squares
+    * 12-bit -> everything that isn't on an edge -> 25 squares
+
+    Thus, 4*8192 + 20*16384 + 25*32768 = 1,179,648 bytes
+
+    To store magic numbers:
+    * One magic multipler for each square: 49 * 8 = 392 bytes
+    * One magic shift for each square: 49 * 1 = 49 bytes
+    * Total = 441 bytes
+
+    Everything all together is 1,180,089 bytes (not including padding and metadata)
+    * This is the absolute MAX (which honestly isn't too bad, ~1.18MB)
+    * May not be consistenly cachable, ideally this should be placed in .data
+    * Can be smaller, multiple blocker patterns can result in the same final bitboard
+    * Hashing algorithm (the magic number finder) should take this into account to save memory

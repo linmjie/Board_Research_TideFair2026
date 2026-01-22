@@ -54,7 +54,7 @@ int main() {
 
     ul poo = 1 << 17;
     
-    std::array<ul, 1024> inp = generator::rookBlocksGenerator(poo);
+    auto inp = generator::rookBlocksGenerator(poo);
     for (auto thing: inp) {
     //    board::printBitBoard(thing);
         board::printBitBoardTransform(thing, [poo](ul th){return generator::rookBlockMask(poo, th);});
