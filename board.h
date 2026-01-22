@@ -99,6 +99,16 @@ namespace board {
     ul simulateMove(ul board, move move);
 }
 
+namespace magic {
+    struct container {
+        int multiplier;
+        byte shift;
+    };
+    extern const std::array<container, 49> rookMagics;
+    extern const std::array<ul, 100> rookMagicMap; //placeholder size
+    //extern const std::array<magContainer, 49> genMagics; maybe use
+}
+
 class Board {
     std::array<board::piece, 49> pieceArray;
 

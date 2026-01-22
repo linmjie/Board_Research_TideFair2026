@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include <iostream>
+#include <vector>
 
 const std::array<ul, 49> board::GENERAL_MOVES = generator::initMaskArray(generator::basicGeneralMask); 
 const std::array<ul, 49> board::OFFICER_MOVES = generator::initMaskArray(generator::basicOfficerMask);
