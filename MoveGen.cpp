@@ -108,7 +108,7 @@ ul generator::getRookMoves(ul board, int pos) {
     return generator::rookBlockMask(rook, board);
 }
 
-std::vector<ul> generator::rookBlocksGenerator(ul rook) {
+const std::vector<ul> generator::rookBlocksGenerator(ul rook) {
     int zeroes = std::countr_zero(rook);
     ul rookMoves = board::ROOK_MOVES[zeroes];
 

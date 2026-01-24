@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <functional>
+#include <vector>
 
 using ul = unsigned long long;
 using byte = unsigned char;
@@ -197,7 +198,7 @@ namespace generator {
     ul getRookMoves(ul board, int rook);
 
     //Eventually used to generate magics to precompute rook stuff
-    std::vector<ul> rookBlocksGenerator(ul rook);
+    const std::vector<ul> rookBlocksGenerator(ul rook);
 
     ul rookBlockMask(ul rook, ul blockers);
     
