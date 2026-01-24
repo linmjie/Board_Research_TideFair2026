@@ -1,0 +1,62 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++20",
+      "-g",
+      "-Wall",
+      "-c",
+      "-o",
+      "main.o",
+      "main.cpp"
+    ],
+    "directory": "/home/lin/vsprojects/TideBoardGame/board",
+    "file": "/home/lin/vsprojects/TideBoardGame/board/main.cpp",
+    "output": "/home/lin/vsprojects/TideBoardGame/board/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++20",
+      "-g",
+      "-Wall",
+      "-c",
+      "-o",
+      "board.o",
+      "Board.cpp"
+    ],
+    "directory": "/home/lin/vsprojects/TideBoardGame/board",
+    "file": "/home/lin/vsprojects/TideBoardGame/board/Board.cpp",
+    "output": "/home/lin/vsprojects/TideBoardGame/board/board.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++20",
+      "-g",
+      "-Wall",
+      "-c",
+      "-o",
+      "movegen.o",
+      "MoveGen.cpp"
+    ],
+    "directory": "/home/lin/vsprojects/TideBoardGame/board",
+    "file": "/home/lin/vsprojects/TideBoardGame/board/MoveGen.cpp",
+    "output": "/home/lin/vsprojects/TideBoardGame/board/movegen.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++20",
+      "-g",
+      "-Wall",
+      "-c",
+      "-o",
+      "boardutil.o",
+      "BoardUtil.cpp"
+    ],
+    "directory": "/home/lin/vsprojects/TideBoardGame/board",
+    "file": "/home/lin/vsprojects/TideBoardGame/board/BoardUtil.cpp",
+    "output": "/home/lin/vsprojects/TideBoardGame/board/boardutil.o"
+  }
+]
