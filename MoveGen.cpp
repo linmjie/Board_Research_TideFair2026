@@ -1,10 +1,7 @@
 #include "board.h"
-#include <array>
 #include <bit>
-#include <cassert>
 
 #include <iostream>
-#include <vector>
 
 const std::array<ul, 49> board::GENERAL_MOVES = generator::initMaskArray(generator::basicGeneralMask); 
 const std::array<ul, 49> board::OFFICER_MOVES = generator::initMaskArray(generator::basicOfficerMask);
@@ -64,6 +61,7 @@ bool generator::isAttacked(const Board *board, int pos, bool sideIsWhite) {
 
     //Special case for generals and officers because of the field dynamic
     //I think this could be magic'ed like rook blockers
+    //Most likely the source of anny incorrect logic'ing
     int oppGeneralPos = std::countr_zero(oppGeneral);
     ul oppField = board::GENERAL_FIELDS[oppGeneralPos];
     ul oppGeneralMove = board::GENERAL_MOVES[pos];
@@ -139,7 +137,7 @@ const std::vector<ul> generator::rookBlocksGenerator(ul rook) {
                        //2^n
     for (int i = 0; i < (1 << backPointer); i++) {
         for (int j = 0; j < backPointer; j++) {
-            int bit = (i >> j) & 1;
+            ul bit = (i >> j) & 1;
 			blockMasks.at(i) |= (bit << bitPositions[j]);
         }
     }

@@ -18,7 +18,7 @@ Board::Board() { //intial board at start of game
     this->b_board = board::BLACK_BOARD;
     
     //array impl.
-    for (int i = 0; i < pieceArray.size(); i++)
+    for (uint i = 0; i < pieceArray.size(); i++)
         pieceArray[i] = board::none;
 
     this->addBitBoardToPieceArray(board::w_general);
@@ -193,7 +193,7 @@ namespace board {
         namespace w_officer {
             ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::OFFICER_MOVES[pos];
-                int genPos = std::countr_zero(board->w_general);
+                uint genPos = std::countr_zero(board->w_general);
                 assert(genPos <= board::GENERAL_FIELDS.size());
                 ul field = board::GENERAL_FIELDS[genPos];
                 move &= field;
@@ -231,7 +231,7 @@ namespace board {
         namespace b_officer {
             ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::OFFICER_MOVES[pos];
-                int genPos = std::countr_zero(board->b_general);
+                uint genPos = std::countr_zero(board->b_general);
                 assert(genPos <= board::GENERAL_FIELDS.size());
                 ul field = board::GENERAL_FIELDS[genPos];
                 move &= field;

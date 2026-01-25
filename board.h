@@ -1,10 +1,13 @@
 #pragma once
+
 #include <array>
 #include <functional>
+#include <cassert>
 #include <vector>
 
 using ul = unsigned long long;
 using byte = unsigned char;
+using uint = unsigned int;
 
 namespace board {
     constexpr ul MAX_49 = ((1ULL << 49) - 1);
@@ -59,7 +62,10 @@ namespace board {
     extern const std::array<ul, 49> GENERAL_FIELDS;
     extern const std::array<std::array<ul, 4>, 49> GENERAL_MOVE_FIELDS;
 
-    //Second function argument is for the transformer of the pos, first function argument is for what to do with that transformed board
+    /**
+     * @param transformer Takes a single position bitboards and returns some new bitboard
+     * @param user What to do with that transformed board
+    */
     void forEachPos(std::function<void(ul, std::function<ul(ul)>)> user, std::function<ul(ul)> transformer); 
     
     void printBitBoard(ul pos);
@@ -101,12 +107,24 @@ namespace board {
 }
 
 namespace magic {
+
+    //Contains the necessary data to hash a rook blocker bitboard
     struct container {
-        int multiplier;
+        ul multiplier;
         byte shift;
     };
-    extern const std::array<container, 49> rookMagics;
-    extern const std::array<ul, 100> rookMagicMap; //placeholder size
+
+    extern const std::array<container, 49> ROOK_MAGICS;
+
+    /**
+     * @brief Like an internal array of a hashmap,
+     * contains vectors for each position where indexing
+     * requires "hashing" through magics to get an index for use in this map.
+     * No abstraction with a container type because of performance 
+     * (mental performance - too lazy)
+     * @note placeholder size
+    */
+    extern const std::array<std::vector<ul>, 49> ROOK_MAGIC_MAP; 
     //extern const std::array<magContainer, 49> genMagics; maybe use
 }
 
