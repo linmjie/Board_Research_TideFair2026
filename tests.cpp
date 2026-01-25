@@ -44,6 +44,15 @@ void test::rookBlocks(uint pos) {
     }
 }
 
+void test::allUniqueRookBlockers() {
+    for (int i = 0; i < 49; i++) {
+        uint count = test::countUniqueRookBlockers(i);
+        std::cout << "Position: " << i << '\t' << "Unique blocked rook moves: " << count << '\n';
+    }
+}
+
+//test::magicGeneration is in magicGen.cpp
+
 uint test::countUniqueRookBlockers(uint pos) {
     std::set<ul> blockedRookMoves;
     auto rookBlockers = generator::rookBlocksGenerator(pos);
@@ -53,11 +62,4 @@ uint test::countUniqueRookBlockers(uint pos) {
         blockedRookMoves.insert(rookMove);
     }
     return blockedRookMoves.size();
-}
-
-void test::allUniqueRookBlockers() {
-    for (int i = 0; i < 49; i++) {
-        uint count = test::countUniqueRookBlockers(i);
-        std::cout << "Position: " << i << '\t' << "Unique blocked rook moves: " << count << '\n';
-    }
 }

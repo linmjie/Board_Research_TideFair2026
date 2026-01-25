@@ -1,4 +1,5 @@
 #include "board.h"
+#include <cassert>
 
 ul inline rookMagicMap_get(uint pos, ul bucketIdx) {
     return magic::ROOK_MAGIC_MAP[pos][bucketIdx];

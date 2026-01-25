@@ -3,6 +3,8 @@
 #include <array>
 #include <functional>
 #include <cassert>
+#include <mutex>
+#include <string>
 #include <vector>
 
 using ul = unsigned long long;
@@ -126,6 +128,16 @@ namespace magic {
     */
     extern const std::array<std::vector<ul>, 49> ROOK_MAGIC_MAP; 
     //extern const std::array<magContainer, 49> genMagics; maybe use
+    
+    namespace gen {
+        struct posMagics {
+            std::vector<ul> buckets;
+            ul multiplier;
+            byte shift;
+        };
+        void posWorker(std::mutex& mtx, posMagics& thisMagic, const uint pos);
+        void manager(const std::string logFile, const std::string finalFile);
+    }
 }
 
 class Board {

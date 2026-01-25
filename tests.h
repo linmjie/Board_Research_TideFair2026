@@ -1,5 +1,6 @@
-using uint = unsigned int;
-using ul = unsigned long long;
+#pragma once
+#include "board.h"
+#include <mutex>
 
 //You can assume void non-verb functions print for you to manually check
 namespace test {
@@ -8,6 +9,7 @@ namespace test {
     void rookBlockerGenerator(uint pos);
     void rookBlocks(uint pos);
     void allUniqueRookBlockers();
+    void magicGeneration(std::mutex& mtx, magic::gen::posMagics& thisMagic, const uint pos);
 
     uint countUniqueRookBlockers(uint pos);
 }
