@@ -31,3 +31,12 @@ void board::forEachPos(std::function<void(ul, std::function<ul(ul)>)> user, std:
 void board::printAllPosTransforms(std::function<ul(ul)> transformer) {
     board::forEachPos(printBitBoardTransform, transformer);
 }
+
+std::string magic::stringifyMagicData(std::array<magic::gen::posMagics, 49> magics) {
+    std::string ret = "const std::array<std::vector<ul>, 49> ROOK_MAGIC_MAP = {\n";
+    for (uint i = 0; i < magics.size(); i++) {
+        auto& mag = magics[i];
+        auto& map = mag.buckets;
+    }
+    return ret;
+}

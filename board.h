@@ -138,6 +138,8 @@ namespace magic {
         void posWorker(std::mutex& mtx, posMagics& thisMagic, const uint pos);
         void manager(const std::string logFile, const std::string finalFile);
     }
+
+    std::string stringifyMagicData(std::array<magic::gen::posMagics, 49> magics);
 }
 
 class Board {

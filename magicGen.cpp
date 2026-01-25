@@ -50,7 +50,8 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
     std::ofstream log;
     log.open(logFile);
     std::ofstream final;
-    log.open(finalFile);
+    final.open(finalFile);
+    std::vector<std::array<magic::gen::posMagics, 49>> magicsLog;
 
     std::array<std::mutex, 49> mutexes;
     //Make sure to access associated mutex to avoid race conditions
@@ -64,25 +65,29 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
     }
 
     while (!sigIntercepted.load()) {
-        std::this_thread::sleep_for(1s);
+        std::this_thread::sleep_for(5s);
         ul size = 0;
         for (uint i = 0; i < 49; i++) {
             std::lock_guard<std::mutex> guard(mutexes.at(i));
             auto magic = magics.at(i);
             size += magic.buckets.size() * 8 + 16;
-            //Replace with actual logging
-            int bytething = magic.shift;
-            std::cout << "=====" << i << "=====" << '\n';
-            std::cout << "Multiplier: " << magic.multiplier << " Shift: " 
-                << bytething << '\n';
+            int bytething = magic.shift; //unsigned chars get interpreted as ascii or utf-16
         }
-        std::cout << "---------------------------" << '\n';
-        std::cout << "Size: " << size << " bytes" << '\n';
+        std::cout << "-------------------------------------" << '\n';
+        std::cout << "Current Size: " << size << " bytes" << '\n';
     }
 
     for (auto& thr : threads) {
         thr.join();
     }
+
+    //A just-in-case log to save all the data
+    std::cout << "\nLogging remaining data!\n";
+    log << "========================================================" << '\n';
+    for (auto& magics : magicsLog) {}
+
+    log.close();
+    final.close();
 }
 
 void test::magicGeneration(std::mutex &mtx, magic::gen::posMagics &thisMagic, const uint pos) {
