@@ -83,3 +83,55 @@ MAGICS FOR ROOKS:
     * May not be consistenly cachable, ideally this should be placed in .data
     * Can be smaller, multiple blocker patterns can result in the same final bitboard
     * Hashing algorithm (the magic number finder) should take this into account to save memory
+
+    Count of unique rook moves with account for blockers:
+    Position: Permutations:
+    0         36
+    1         30
+    2         48
+    3         54
+    4         48
+    5         30
+    6         36
+    7         30
+    8         25
+    9         40
+    10        45
+    11        40
+    12        25
+    13        30
+    14        48
+    15        40
+    16        64
+    17        72
+    18        64
+    19        40
+    20        48
+    21        54
+    22        45
+    23        72
+    24        81
+    25        72
+    26        45
+    27        54
+    28        48
+    29        40
+    30        64
+    31        72
+    32        64
+    33        40
+    34        48
+    35        30
+    36        25
+    37        40
+    38        45
+    39        40
+    40        25
+    41        30
+    42        36
+    43        30
+    44        48
+    45        54
+    46        48
+    47        30
+    48        36

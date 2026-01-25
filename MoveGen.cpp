@@ -15,7 +15,7 @@ const std::array<std::array<ul, 4>, 49> board::GENERAL_MOVE_FIELDS = generator::
 std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator) {
     std::array<ul, 49> ret;
     board::forEachPos([&ret](ul pos, auto transformer) {
-            ret.at(std::countr_zero(pos)) = transformer(pos);}, 
+            ret.at(std::countr_zero(pos)) = transformer(pos) & board::FULL_BOARD; }, 
             maskGenerator);
     return ret;
 }
@@ -106,14 +106,11 @@ ul generator::getRookMoves(ul board, int pos) {
     return generator::rookBlockMask(rook, board);
 }
 
-const std::vector<ul> generator::rookBlocksGenerator(ul rook) {
-    int zeroes = std::countr_zero(rook);
-    ul rookMoves = board::ROOK_MOVES[zeroes];
+const std::vector<ul> generator::rookBlocksGenerator(uint rookPos) {
+    ul rookMoves = board::ROOK_MOVES[rookPos];
 
     rookMoves &= board::NO_CORNERS;
 
-    //board::printBitBoard(rookMoves);
-        
     int bitPositions[12] = {};
 
     int backPointer = 0;
@@ -153,13 +150,11 @@ const std::vector<ul> generator::rookBlocksGenerator(ul rook) {
 /*Users responsibility to give an inputted bitboard with: 
 * only bits intersecting with the rookMove, 
 */
-ul generator::rookBlockMask(ul rook, ul blockers) {
-    ul rookMoves = board::ROOK_MOVES[std::countr_zero(rook)];
+ul generator::rookBlockMask(uint rookPos, ul blockers) {
+    ul rookMoves = board::ROOK_MOVES[rookPos];
 
-    int x = std::countr_zero(rook) % 7;
-    int y = std::countr_zero(rook) / 7;
-
-    std::cout << "x: " << x << " y: " << y << '\n';
+    int x = rookPos % 7;
+    int y = rookPos / 7;
 
     //relevant rank and file of blockers bitboard
     ul rank = (blockers >> (y * 7)) & board::RANK_7;
