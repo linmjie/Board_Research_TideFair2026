@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <chrono>
+#include <unistd.h>
 #include "board.h"
 #include "tests.h"
 
@@ -18,6 +19,7 @@ int main(int argc, char *argv[]) {
     using namespace std::chrono;
     Board board;
     std::cout << GREEN << "C++ version: " << RESET << __cplusplus << '\n';
+    std::cout << GREEN << "Process id: " << RESET << getpid() << '\n';
     auto start = system_clock::now();
 
     int exitCode = mainMethod(argc, argv);

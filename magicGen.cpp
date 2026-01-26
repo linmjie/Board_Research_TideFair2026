@@ -16,6 +16,7 @@ static std::atomic<bool> sigIntercepted(false);
 
 static void handleQuit(int sig) {
     std::cout << "Intercepted signal: " << sig << std::endl;
+    std::cout << "Keep in mind this still waits for the cycle to complete" << std::endl;
     sigIntercepted.store(!sigIntercepted.load());
 }
 
@@ -66,12 +67,17 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
     std::vector<std::thread> threads;
     threads.reserve(49);
     for (int pos = 0; pos < 49; pos++) {
+        //Each thread owns a corresponding mutex and posMagic
+        //All linked together by the same index(it's kind of coupled but it's alright)
         threads.emplace_back(test::magicGeneration,
                 std::ref(mutexes.at(pos)), std::ref(magics.at(pos)), pos);
     }
 
+    auto sleepTime = 2500ms;
+    auto maxSleepTime = 180000ms; //30 minutes
     while (!sigIntercepted.load()) {
-        std::this_thread::sleep_for(5s);
+        std::this_thread::sleep_for(sleepTime);
+        sleepTime = sleepTime > maxSleepTime ? maxSleepTime : sleepTime * 2;
         ul size = 0;
         magicsLog.push_back({});
         for (uint i = 0; i < 49; i++) {
@@ -83,6 +89,7 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
         }
         std::cout << "-------------------------------------" << '\n';
         std::cout << "Current Size: " << size << " bytes" << '\n';
+        std::cout << "Next sleep time: " << sleepTime.count() << '\n';
     }
 
     for (auto& thr : threads) {
