@@ -139,7 +139,7 @@ namespace magic {
         void manager(const std::string logFile, const std::string finalFile);
     }
 
-    std::string stringifyMagicData(std::array<magic::gen::posMagics, 49> magics);
+    std::string stringifyMagicData(const std::array<magic::gen::posMagics, 49>& magics);
 }
 
 class Board {

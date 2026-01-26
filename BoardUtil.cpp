@@ -1,5 +1,7 @@
 #include "board.h"
 #include <bitset>
+#include <ios>
+#include <sstream>
 #include <string>
 #include <iostream>
 
@@ -32,11 +34,33 @@ void board::printAllPosTransforms(std::function<ul(ul)> transformer) {
     board::forEachPos(printBitBoardTransform, transformer);
 }
 
-std::string magic::stringifyMagicData(std::array<magic::gen::posMagics, 49> magics) {
-    std::string ret = "const std::array<std::vector<ul>, 49> ROOK_MAGIC_MAP = {\n";
+std::string magic::stringifyMagicData(const std::array<magic::gen::posMagics, 49>& magics) {
+    std::ostringstream strm;
+    strm << "const std::array<std::vector<ul>, 49> ROOK_MAGIC_MAP = {{\n";
+    std::string tab = "    ";
     for (uint i = 0; i < magics.size(); i++) {
-        auto& mag = magics[i];
+        auto& mag = magics.at(i);
         auto& map = mag.buckets;
+        strm << tab << "{ ";
+        for (uint j = 0; j < map.size(); j++) {
+            strm << std::hex << "0x" << map.at(j) << "ULL";
+            if (j < map.size() - 1) strm << ", ";
+        }
+        strm << std::dec << " }";
+        if (i < magics.size() - 1) strm << ",";
+        strm << '\n';
     }
-    return ret;
+    strm << "}};\n";
+        
+    strm << "const std::array<container, 49> ROOK_MAGICS = {{\n";
+    strm << tab;
+    for (uint i = 0; i < magics.size(); i++) {
+        auto& mag = magics.at(i);
+        int byteSave = mag.shift;
+        strm << "{ " << mag.multiplier;
+        strm << ", " << byteSave << " }";
+        if (i < magics.size() - 1) strm << ", ";
+    }
+    strm << "\n}};\n";
+    return strm.str();
 }

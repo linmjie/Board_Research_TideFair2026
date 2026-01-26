@@ -51,6 +51,12 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
     log.open(logFile);
     std::ofstream final;
     final.open(finalFile);
+    if (!log.is_open()) {
+        std::cerr << "Unable to open log file: " << logFile << '\n';
+    }
+    if (!final.is_open()) {
+        std::cerr << "Unable to open log file: " << logFile << '\n';
+    }
     std::vector<std::array<magic::gen::posMagics, 49>> magicsLog;
 
     std::array<std::mutex, 49> mutexes;
@@ -67,11 +73,13 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
     while (!sigIntercepted.load()) {
         std::this_thread::sleep_for(5s);
         ul size = 0;
+        magicsLog.push_back({});
         for (uint i = 0; i < 49; i++) {
             std::lock_guard<std::mutex> guard(mutexes.at(i));
-            auto magic = magics.at(i);
+            auto& magic = magics.at(i);
             size += magic.buckets.size() * 8 + 16;
-            int bytething = magic.shift; //unsigned chars get interpreted as ascii or utf-16
+            int bytething = magic.shift; //unsigned chars get interpreted as ascii or utf-8
+            magicsLog.back().at(i) = magic;
         }
         std::cout << "-------------------------------------" << '\n';
         std::cout << "Current Size: " << size << " bytes" << '\n';
@@ -83,9 +91,11 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
 
     //A just-in-case log to save all the data
     std::cout << "\nLogging remaining data!\n";
-    log << "========================================================" << '\n';
-    for (auto& magics : magicsLog) {}
+    for (auto& magics : magicsLog) {
+        log << magic::stringifyMagicData(magics);
+    }
 
+    if (magicsLog.size() > 0) final << magic::stringifyMagicData(magicsLog.back());
     log.close();
     final.close();
 }
@@ -93,8 +103,10 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
 void test::magicGeneration(std::mutex &mtx, magic::gen::posMagics &thisMagic, const uint pos) {
     using namespace std::chrono_literals;
     while (!sigIntercepted) {
-        std::lock_guard<std::mutex> guard(mtx);
         std::this_thread::sleep_for(10ms); //Simulate complex calculations
+                                           //These calculations only need read access
+        std::lock_guard<std::mutex> guard(mtx); //After this is when this needs write access
+        std::this_thread::sleep_for(1ms);
         thisMagic.buckets.push_back(pos);
         thisMagic.multiplier++;
         thisMagic.shift = pos;
