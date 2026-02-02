@@ -129,12 +129,16 @@ namespace magic {
     extern const std::array<std::vector<ul>, 49> ROOK_MAGIC_MAP; 
     //extern const std::array<magContainer, 49> genMagics; maybe use
     
+    //From permutations described in board.txt, the miniumum number of bits for that amount of moves
+    extern const std::array<uint, 49> MIN_BITS_IN_UNIQUE_ROOKMOVE;
+    
     namespace gen {
         struct posMagics {
             std::vector<ul> buckets;
             ul multiplier;
-            byte shift;
+            uint shift; //struct will be padded anyways, no point in using unsigned char
         };
+        bool validateMagic(const std::vector<ul>& blockCombinations, ul multiplier, uint shift);
         void posWorker(std::mutex& mtx, posMagics& thisMagic, const uint pos);
         void manager(const std::string logFile, const std::string finalFile);
     }

@@ -12,5 +12,5 @@ ul magicedRookMoves(ul board, int pos) {
     blockerBoard &= board::NO_CORNERS;
     const magic::container& container = magic::ROOK_MAGICS[pos];
     ul bucketIdx = (blockerBoard * container.multiplier) >> container.shift;
-    rookMagicMap_get(pos, bucketIdx);
+    return rookMagicMap_get(pos, bucketIdx);
 }

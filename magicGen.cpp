@@ -21,16 +21,25 @@ static void handleQuit(int sig) {
 }
 
 void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, const uint pos) {
-    assert(false);
+    uint minBits = magic::MIN_BITS_IN_UNIQUE_ROOKMOVE[pos];
+    uint idealShift = 64 - minBits;
 
     while (!sigIntercepted) {
-        std::lock_guard<std::mutex> guard(mtx);
-
         auto blockCombinations = generator::rookBlocksGenerator(1ULL << pos);
-        for(ul blockBoard : blockCombinations) {
-            ul resultantRookMoves = generator::rookBlockMask(blockBoard, pos);
-            resultantRookMoves;
-            thisMagic;
+        ul multiplier = magic::gen::getNextMultiplier();
+        std::vector<ul> vec;
+        //We want something as close to the idealshift as possible, hence starting at it
+        uint i;
+        for (i = idealShift; i > 0; i--) {
+            if ((blockCombinations.back() >> i) < (1ULL << minBits)) continue;
+        }
+
+        if (vec.size() < thisMagic.buckets.size()) {
+            //Need ownership once the function actually writes to the magic 
+            std::lock_guard<std::mutex> guard(mtx);
+            thisMagic.multiplier = multiplier;
+            thisMagic.shift = i;
+            thisMagic.buckets = vec;
         }
     }
 }
@@ -84,7 +93,6 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
             std::lock_guard<std::mutex> guard(mutexes.at(i));
             auto& magic = magics.at(i);
             size += magic.buckets.size() * 8 + 16;
-            int bytething = magic.shift; //unsigned chars get interpreted as ascii or utf-8
             magicsLog.back().at(i) = magic;
         }
         std::cout << "-------------------------------------" << '\n';
@@ -92,9 +100,7 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
         std::cout << "Next sleep time: " << sleepTime.count() << '\n';
     }
 
-    for (auto& thr : threads) {
-        thr.join();
-    }
+    for (auto& thr : threads) thr.join();
 
     //A just-in-case log to save all the data
     std::cout << "\nLogging remaining data!\n";

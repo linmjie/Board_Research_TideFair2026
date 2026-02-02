@@ -13,6 +13,9 @@ def main():
         case 'c':
             inp = input("Column: ")
             output(columnDuper(inp))
+        case 'p':
+            permBitCounter()
+
     print()
 
 def initFunction():
@@ -23,6 +26,16 @@ def initFunction():
     for i in range(256):
         print(bin(i))
         print(bin(i | ~(255)))
+
+def permBitCounter():
+    #pre-generated, see board.txt
+    permutationsStrings = '36 30 48 54 48 30 36 30 25 40 45 40 25 30 48 40 64 72 64 40 48 54 45 72 81 72 45 54 48 40 64 72 64 40 48 30 25 40 45 40 25 30 36 30 48 54 48 30 36'.split()
+    permutationsLen = []
+    for perm in permutationsStrings:
+        temp = int(perm)
+        temp = bin(temp).split('b')[1]
+        permutationsLen.append(len(temp))
+    print(permutationsLen)
 
 def printBoard(num: int):
     binary = bin(num).split('b')[1]
@@ -73,3 +86,4 @@ def printRows(verify = False):
 initFunction()
 while True:
     main()
+
