@@ -2,11 +2,13 @@
 #include <cstdlib>
 #include <fstream>
 #include <mutex>
+#include <set>
 #include <thread>
 #include <iostream>
 
 #include <csignal>
 #include <unistd.h>
+#include <vector>
 #include "board.h"
 #include "tests.h"
 
@@ -21,12 +23,19 @@ static void handleQuit(int sig) {
 }
 
 void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, const uint pos) {
+    auto blockCombinations = generator::rookBlocksGenerator(1ULL << pos);
+    size_t size = blockCombinations.size();
+    std::vector<ul> blockedRookMoves(size);
+    for (uint i = 0; i < size; i++) {
+        ul blocker = blockCombinations.at(i);
+        blockedRookMoves.at(i) = generator::rookBlockMask(pos, blocker);
+    }
     uint minBits = magic::MIN_BITS_IN_UNIQUE_ROOKMOVE[pos];
     uint idealShift = 64 - minBits;
+    ul prevMultiplier = 1;
 
     while (!sigIntercepted) {
-        auto blockCombinations = generator::rookBlocksGenerator(1ULL << pos);
-        ul multiplier = magic::gen::getNextMultiplier();
+        ul multiplier = magic::gen::getNextMultiplier(prevMultiplier);
         std::vector<ul> vec;
         //We want something as close to the idealshift as possible, hence starting at it
         uint i;
@@ -44,6 +53,30 @@ void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, co
     }
 }
 
+bool magic::gen::validateMagic(const std::vector<ul>& blockCombinations, const std::vector<ul>& blockedRookMoves,
+        const ul multiplier, const uint shift)
+{
+    assert(blockCombinations.size() == blockedRookMoves.size());
+    std::vector<ul> buckets;
+    //Since a zeroed out bitboard is a valid move bitboard, but they are uncommon,
+    //we save which bucket indices are 0 as 'data' rather than 0 as a default value
+    std::set<uint> posWithZeroMoves;
+    for (uint i = 0; i < blockCombinations.size(); i++) {
+        const ul blocker = blockCombinations[i];
+        const ul blockedBoard = blockedRookMoves[i];
+        uint bucketIdx = (blocker * multiplier) >> shift;
+
+        if (bucketIdx > buckets.size()) buckets.resize(bucketIdx, 0);
+        if (blockedBoard == 0) posWithZeroMoves.insert(bucketIdx);
+        if (buckets.at(bucketIdx) != blockedBoard) {
+            //The buckets items are default intialized to 0
+            //Ensure that the 0 is a default value 0 and not a 'data' 0
+            if (posWithZeroMoves.contains(bucketIdx)) [[unlikely]] return false;
+        }
+    }
+    return true;
+}
+        
 void magic::gen::manager(const std::string logFile, const std::string finalFile) {
     using namespace std::chrono;
 

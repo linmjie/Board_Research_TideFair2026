@@ -138,7 +138,11 @@ namespace magic {
             ul multiplier;
             uint shift; //struct will be padded anyways, no point in using unsigned char
         };
-        bool validateMagic(const std::vector<ul>& blockCombinations, ul multiplier, uint shift);
+        
+        //It's ideal to pre-generate the vectors once, so we pass them by const reference each function call
+        //rather than constructing them inside of the function
+        bool validateMagic(const std::vector<ul>& blockCombinations,const std::vector<ul>& blockedRookMoves,
+                const ul multiplier, const uint shift);
         void posWorker(std::mutex& mtx, posMagics& thisMagic, const uint pos);
         void manager(const std::string logFile, const std::string finalFile);
     }

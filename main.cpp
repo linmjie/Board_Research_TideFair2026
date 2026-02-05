@@ -26,8 +26,8 @@ int main(int argc, char *argv[]) {
 
     auto end = system_clock::now();
     auto duration = duration_cast<milliseconds>(end - start);
-    exitCode ? std::cout << RED << "Returned with non-zero exit code: " << RESET << exitCode << '\n'
-        : std::cout << GREEN << "Returned with exit code of " << RESET << 0 << '\n';
+    if (exitCode) std::cout << RED << "Returned with non-zero exit code: " << RESET << exitCode << '\n';
+    else std::cout << GREEN << "Returned with exit code of " << RESET << 0 << '\n';
     hh_mm_ss<milliseconds> time(duration);
     std::cout << GREEN << "Time elapsed(h:m:s.ms): " << RESET << time << '\n';
 
