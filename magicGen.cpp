@@ -1,18 +1,14 @@
-#include <atomic>
-#include <cstdlib>
 #include <fstream>
-#include <mutex>
+#include <optional>
 #include <set>
 #include <thread>
 #include <iostream>
 
 #include <csignal>
 #include <unistd.h>
-#include <vector>
+
 #include "board.h"
 #include "tests.h"
-
-//Placeholder stuff
 
 static std::atomic<bool> sigIntercepted(false);
 
@@ -57,22 +53,17 @@ bool magic::gen::validateMagic(const std::vector<ul>& blockCombinations, const s
         const ul multiplier, const uint shift)
 {
     assert(blockCombinations.size() == blockedRookMoves.size());
-    std::vector<ul> buckets;
-    //Since a zeroed out bitboard is a valid move bitboard, but they are uncommon,
-    //we save which bucket indices are 0 as 'data' rather than 0 as a default value
-    std::set<uint> posWithZeroMoves;
+    std::vector<std::optional<ul>> buckets;
     for (uint i = 0; i < blockCombinations.size(); i++) {
         const ul blocker = blockCombinations[i];
         const ul blockedBoard = blockedRookMoves[i];
         uint bucketIdx = (blocker * multiplier) >> shift;
+        if (bucketIdx > 2000) return false; //Index is too big to be useful
 
-        if (bucketIdx > buckets.size()) buckets.resize(bucketIdx, 0);
-        if (blockedBoard == 0) posWithZeroMoves.insert(bucketIdx);
-        if (buckets.at(bucketIdx) != blockedBoard) {
-            //The buckets items are default intialized to 0
-            //Ensure that the 0 is a default value 0 and not a 'data' 0
-            if (posWithZeroMoves.contains(bucketIdx)) [[unlikely]] return false;
-        }
+        if (bucketIdx >= buckets.size()) buckets.resize(bucketIdx + 1);
+        auto& opt = buckets.at(bucketIdx);
+        if (!opt.has_value()) buckets.at(bucketIdx) = std::make_optional(blockedBoard);
+        else if (opt.value() != blockedBoard) return false;
     }
     return true;
 }

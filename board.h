@@ -124,7 +124,6 @@ namespace magic {
      * requires "hashing" through magics to get an index for use in this map.
      * No abstraction with a container type because of performance 
      * (mental performance - too lazy)
-     * @note placeholder size
     */
     extern const std::array<std::vector<ul>, 49> ROOK_MAGIC_MAP; 
     //extern const std::array<magContainer, 49> genMagics; maybe use
