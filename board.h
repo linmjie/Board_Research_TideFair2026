@@ -140,10 +140,18 @@ namespace magic {
         
         //It's ideal to pre-generate the vectors once, so we pass them by const reference each function call
         //rather than constructing them inside of the function
-        bool validateMagic(const std::vector<ul>& blockCombinations,const std::vector<ul>& blockedRookMoves,
+        bool validateMagic(
+                const std::vector<ul>& blockCombinations,
+                const std::vector<ul>& blockedRookMoves,
                 const ul multiplier, const uint shift);
         void posWorker(std::mutex& mtx, posMagics& thisMagic, const uint pos);
         void manager(const std::string logFile, const std::string finalFile);
+        ul getNextMultiplier(ul prevMultiplier);
+    }
+
+    namespace rand {
+        ul getNext(ul& prev);
+        ul toLowBitNumber(ul rand1, ul rand2, ul rand3, ul rand4);
     }
 
     std::string stringifyMagicData(const std::array<magic::gen::posMagics, 49>& magics);

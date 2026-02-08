@@ -31,15 +31,20 @@ void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, co
     ul prevMultiplier = 1;
 
     while (!sigIntercepted) {
+        bool foundValidMagic = false;
         ul multiplier = magic::gen::getNextMultiplier(prevMultiplier);
         std::vector<ul> vec;
         //We want something as close to the idealshift as possible, hence starting at it
         uint i;
         for (i = idealShift; i > 0; i--) {
             if ((blockCombinations.back() >> i) < (1ULL << minBits)) continue;
+            if (validateMagic(blockCombinations, blockedRookMoves, multiplier, i)) {
+                foundValidMagic = true;
+                break;
+            }
         }
 
-        if (vec.size() < thisMagic.buckets.size()) {
+        if (foundValidMagic && vec.size() < thisMagic.buckets.size()) {
             //Need ownership once the function actually writes to the magic 
             std::lock_guard<std::mutex> guard(mtx);
             thisMagic.multiplier = multiplier;
@@ -49,7 +54,9 @@ void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, co
     }
 }
 
-bool magic::gen::validateMagic(const std::vector<ul>& blockCombinations, const std::vector<ul>& blockedRookMoves,
+bool magic::gen::validateMagic(
+        const std::vector<ul>& blockCombinations,
+        const std::vector<ul>& blockedRookMoves,
         const ul multiplier, const uint shift)
 {
     assert(blockCombinations.size() == blockedRookMoves.size());
@@ -66,6 +73,34 @@ bool magic::gen::validateMagic(const std::vector<ul>& blockCombinations, const s
         else if (opt.value() != blockedBoard) return false;
     }
     return true;
+}
+
+ul magic::gen::getNextMultiplier(ul prevMultiplier) {
+    using namespace magic::rand;
+    ul state = prevMultiplier;
+    ul rand1, rand2, rand3, rand4;
+    rand1 = getNext(state); rand2 = getNext(state);
+    rand3 = getNext(state); rand4 = getNext(state);
+    return rand::toLowBitNumber(rand1, rand2, rand3, rand4);
+}
+
+//A random number generator from the internet (prng.di.unimi.it/splitmix64.c)
+//C++ random device is too slow and safe for our use case
+//Just need thread local random numbers fast, deterministic is fine
+ul magic::rand::getNext(ul& prev) {
+    prev += 0x9E3779B97F4A7C15ULL;
+    ul z = prev;
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+    return z ^ (z >> 31);
+}
+
+ul magic::rand::toLowBitNumber(ul rand1, ul rand2, ul rand3, ul rand4) {
+    rand1 &= 0xFFFF;
+    rand2 &= 0xFFFF;
+    rand3 &= 0xFFFF;
+    rand4 &= 0xFFFF;
+    return rand1 | (rand2 << 16) | (rand3 << 32) | (rand4 << 48);
 }
         
 void magic::gen::manager(const std::string logFile, const std::string finalFile) {
