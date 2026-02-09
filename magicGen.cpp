@@ -14,7 +14,7 @@ static std::atomic<bool> sigIntercepted(false);
 static void handleQuit(int sig) {
     std::cout << "Intercepted signal: " << sig << std::endl;
     std::cout << "Keep in mind this still waits for the cycle to complete" << std::endl;
-    sigIntercepted.store(!sigIntercepted.load());
+    sigIntercepted.store(true);
 }
 
 void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, const uint pos) {
@@ -158,7 +158,7 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
     auto sleepTime = 2500ms;
     auto maxSleepTime = 180000ms; //30 minutes
                                   
-    maxSleepTime = 2500ms; //REMOVE LATER
+    // maxSleepTime = 2500ms; //REMOVE LATER
                            
     while (!sigIntercepted.load()) {
         std::this_thread::sleep_for(sleepTime);
