@@ -1,9 +1,12 @@
 CPP = g++
 FLAGS = -std=c++20 -g -Wall -Wextra
-ALL = main.o board.o movegen.o boardutil.o tests.o magicGen.o
+ALL = main.o board.o movegen.o boardutil.o tests.o magicGen.o predfinedMagics.o
 
 output: $(ALL) 
 	$(CPP) $(FLAGS) -o output $(ALL)
+
+predfinedMagics.o: predfinedMagics.cpp
+	$(CPP) $(FLAGS) -c predfinedMagics.cpp -o predfinedMagics.o
 
 tests.o: tests.cpp
 	$(CPP) $(FLAGS) -c tests.cpp -o tests.o

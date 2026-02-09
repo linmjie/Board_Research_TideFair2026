@@ -1,6 +1,5 @@
 #include <fstream>
 #include <optional>
-#include <set>
 #include <thread>
 #include <iostream>
 
@@ -19,7 +18,7 @@ static void handleQuit(int sig) {
 }
 
 void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, const uint pos) {
-    auto blockCombinations = generator::rookBlocksGenerator(1ULL << pos);
+    auto blockCombinations = generator::rookBlocksGenerator(pos);
     size_t size = blockCombinations.size();
     std::vector<ul> blockedRookMoves(size);
     for (uint i = 0; i < size; i++) {
@@ -33,18 +32,22 @@ void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, co
     while (!sigIntercepted) {
         bool foundValidMagic = false;
         ul multiplier = magic::gen::getNextMultiplier(prevMultiplier);
+        prevMultiplier = multiplier;
         std::vector<ul> vec;
         //We want something as close to the idealshift as possible, hence starting at it
         uint i;
-        for (i = idealShift; i > 0; i--) {
-            if ((blockCombinations.back() >> i) < (1ULL << minBits)) continue;
-            if (validateMagic(blockCombinations, blockedRookMoves, multiplier, i)) {
+        for (i = idealShift; i > 20; i--) {
+            // if ((blockedRookMoves.back() >> i) < (1ULL << minBits)) continue;
+            std::optional<std::vector<ul>> items;
+            items = validateMagic(blockCombinations, blockedRookMoves, multiplier, i, minBits);
+            if (items.has_value()) {
                 foundValidMagic = true;
+                vec = items.value();
                 break;
             }
         }
 
-        if (foundValidMagic && vec.size() < thisMagic.buckets.size()) {
+        if (foundValidMagic && (vec.size() < thisMagic.buckets.size())) {
             //Need ownership once the function actually writes to the magic 
             std::lock_guard<std::mutex> guard(mtx);
             thisMagic.multiplier = multiplier;
@@ -54,25 +57,40 @@ void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, co
     }
 }
 
-bool magic::gen::validateMagic(
+std::optional<std::vector<ul>> magic::gen::validateMagic(
         const std::vector<ul>& blockCombinations,
         const std::vector<ul>& blockedRookMoves,
-        const ul multiplier, const uint shift)
+        const ul multiplier, const uint shift, const uint minBits)
 {
     assert(blockCombinations.size() == blockedRookMoves.size());
     std::vector<std::optional<ul>> buckets;
+    const ul minSize = 1ULL << minBits;
+    buckets.resize(minSize);
     for (uint i = 0; i < blockCombinations.size(); i++) {
         const ul blocker = blockCombinations[i];
         const ul blockedBoard = blockedRookMoves[i];
         uint bucketIdx = (blocker * multiplier) >> shift;
-        if (bucketIdx > 2000) return false; //Index is too big to be useful
+        if (bucketIdx == 0) {
+            // std::cout << "zero index, shift: " << shift << std::endl;
+        }
+        // std::cout << "index: " << bucketIdx << ", shift: " << shift << std::endl;
+        if (bucketIdx > minSize) {
+            // std::cout << "too big, shift: " << shift << std::endl;
+            return std::nullopt; //Index is too big to be useful
+        }
 
         if (bucketIdx >= buckets.size()) buckets.resize(bucketIdx + 1);
-        auto& opt = buckets.at(bucketIdx);
+        std::optional<ul>& opt = buckets.at(bucketIdx);
         if (!opt.has_value()) buckets.at(bucketIdx) = std::make_optional(blockedBoard);
-        else if (opt.value() != blockedBoard) return false;
+        else if (opt.value() != blockedBoard) {
+            // std::cout << "collision" << std::endl;
+            return std::nullopt;
+        }
     }
-    return true;
+    std::vector<ul> ret;
+    ret.reserve(buckets.size());
+    for (const auto& item : buckets) ret.push_back(item.value_or(0));
+    return std::make_optional(ret);
 }
 
 ul magic::gen::getNextMultiplier(ul prevMultiplier) {
@@ -96,11 +114,7 @@ ul magic::rand::getNext(ul& prev) {
 }
 
 ul magic::rand::toLowBitNumber(ul rand1, ul rand2, ul rand3, ul rand4) {
-    rand1 &= 0xFFFF;
-    rand2 &= 0xFFFF;
-    rand3 &= 0xFFFF;
-    rand4 &= 0xFFFF;
-    return rand1 | (rand2 << 16) | (rand3 << 32) | (rand4 << 48);
+    return rand1 & rand2 & rand3 & rand4;
 }
         
 void magic::gen::manager(const std::string logFile, const std::string finalFile) {
@@ -124,7 +138,7 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
         std::cerr << "Unable to open log file: " << logFile << '\n';
     }
     if (!final.is_open()) {
-        std::cerr << "Unable to open log file: " << logFile << '\n';
+        std::cerr << "Unable to open log file: " << finalFile << '\n';
     }
     std::vector<std::array<magic::gen::posMagics, 49>> magicsLog;
 
@@ -137,12 +151,15 @@ void magic::gen::manager(const std::string logFile, const std::string finalFile)
     for (int pos = 0; pos < 49; pos++) {
         //Each thread owns a corresponding mutex and posMagic
         //All linked together by the same index(it's kind of coupled but it's alright)
-        threads.emplace_back(test::magicGeneration,
+        threads.emplace_back(magic::gen::posWorker,
                 std::ref(mutexes.at(pos)), std::ref(magics.at(pos)), pos);
     }
 
     auto sleepTime = 2500ms;
     auto maxSleepTime = 180000ms; //30 minutes
+                                  
+    maxSleepTime = 2500ms; //REMOVE LATER
+                           
     while (!sigIntercepted.load()) {
         std::this_thread::sleep_for(sleepTime);
         sleepTime = sleepTime > maxSleepTime ? maxSleepTime : sleepTime * 2;

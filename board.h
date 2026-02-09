@@ -4,6 +4,7 @@
 #include <functional>
 #include <cassert>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -140,10 +141,10 @@ namespace magic {
         
         //It's ideal to pre-generate the vectors once, so we pass them by const reference each function call
         //rather than constructing them inside of the function
-        bool validateMagic(
+        std::optional<std::vector<ul>> validateMagic(
                 const std::vector<ul>& blockCombinations,
                 const std::vector<ul>& blockedRookMoves,
-                const ul multiplier, const uint shift);
+                const ul multiplier, const uint shift, const uint minBits);
         void posWorker(std::mutex& mtx, posMagics& thisMagic, const uint pos);
         void manager(const std::string logFile, const std::string finalFile);
         ul getNextMultiplier(ul prevMultiplier);
