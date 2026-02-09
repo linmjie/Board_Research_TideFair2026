@@ -8,5 +8,7 @@ class Bot {
     public:
         Bot(const Board& board, bool sideIsWhite, uint maxMovesDepth);
         virtual board::move getBestMove() = 0;
-        virtual ~Bot() = default;
+        uint getMaxMoveDepth() const;
+        bool getSideIsWhite() const;
+        ~Bot() = default;
 };
