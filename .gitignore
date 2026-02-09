@@ -3,6 +3,7 @@ a.out
 output
 .DS_Store
 .idea/
+output.dSYM/
 .vscode/
 .cache/
 compile_commands.json

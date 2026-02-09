@@ -1,30 +1,16 @@
-CPP = g++
-FLAGS = -std=c++20 -g -Wall -Wextra
-ALL = main.o board.o movegen.o boardutil.o tests.o magicGen.o predfinedMagics.o
+CXX = g++
+CXXFLAGS = -std=c++20 -g -Wall -Wextra
+TARGET = output 
+SRCS = $(wildcard *.cpp)
+OBJS = $(SRCS:.cpp=.o)
 
-output: $(ALL) 
-	$(CPP) $(FLAGS) -o output $(ALL)
+all: $(TARGET)
 
-predfinedMagics.o: predfinedMagics.cpp
-	$(CPP) $(FLAGS) -c predfinedMagics.cpp -o predfinedMagics.o
+$(TARGET): $(OBJS)
+	$(CXX) $(OBJS) -o $(TARGET)
 
-tests.o: tests.cpp
-	$(CPP) $(FLAGS) -c tests.cpp -o tests.o
-
-magicGen.o: magicGen.cpp
-	$(CPP) $(FLAGS) -c magicGen.cpp -o magicGen.o
-
-board.o: Board.cpp
-	$(CPP) $(FLAGS) -c Board.cpp -o board.o
-
-movegen.o: MoveGen.cpp
-	$(CPP) $(FLAGS) -c MoveGen.cpp -o movegen.o
-
-boardutil.o: BoardUtil.cpp
-	$(CPP) $(FLAGS) -c BoardUtil.cpp -o boardutil.o
-
-main.o: main.cpp
-	$(CPP) $(FLAGS) -c main.cpp -o main.o
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm output $(ALL)
+	rm $(OBJS) $(TARGET)
