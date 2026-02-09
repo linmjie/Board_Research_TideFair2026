@@ -50,6 +50,7 @@ void magic::gen::posWorker(std::mutex& mtx, magic::gen::posMagics& thisMagic, co
         if (foundValidMagic && (vec.size() < thisMagic.buckets.size())) {
             //Need ownership once the function actually writes to the magic 
             std::lock_guard<std::mutex> guard(mtx);
+            std::cout << "Found a magic\n";
             thisMagic.multiplier = multiplier;
             thisMagic.shift = i;
             thisMagic.buckets = vec;
