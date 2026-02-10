@@ -6,9 +6,11 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 using ul = unsigned long long;
+using bitboard = unsigned long long;
 using byte = unsigned char;
 using uint = unsigned int;
 
@@ -107,6 +109,11 @@ namespace board {
     };
 
     ul simulateMove(ul board, move move);
+
+    using MoveVector = std::vector<board::move>;
+    template<typename T>
+    concept Move = std::is_same_v<T, bitboard>
+                || std::is_same_v<T, MoveVector>;
 }
 
 namespace magic {
@@ -159,6 +166,7 @@ namespace magic {
 }
 
 class Board {
+
     std::array<board::piece, 49> pieceArray;
 
     public:    
@@ -183,7 +191,13 @@ class Board {
         void makeMove(board::move move);
         ul getBitBoard(board::piece piece);
         ul getMoveMask(int pos);
-        auto getPieces() {return pieceArray;}
+        auto getPieces() { return pieceArray; }
+        
+        /**
+         * @tparam T Has to either be a bitboard(or any uint64) or a vector of move structs(board::MoveVector)
+        */
+        template<board::Move T>
+        std::array<std::optional<T>, 49> getAllMoves();
 
     protected:
         void addBitBoardToPieceArray(board::piece piece);

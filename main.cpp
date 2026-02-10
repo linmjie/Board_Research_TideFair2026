@@ -4,10 +4,13 @@
 #include <unistd.h>
 #include "board.h"
 #include "tests.h"
+#include "collector.h"
 
 int mainMethod(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) std::cout << "arg " << i << ": " << argv[i] << '\n';
+    Board board;
     magic::gen::manager("DELETE_THIS", "DELETE_THIS_TOO");
+
     return 0;
 }
 
@@ -17,7 +20,6 @@ const std::string RESET = "\033[0m";
 
 int main(int argc, char *argv[]) {
     using namespace std::chrono;
-    Board board;
     std::cout << GREEN << "C++ version: " << RESET << __cplusplus << '\n';
     std::cout << GREEN << "Process id: " << RESET << getpid() << '\n';
     auto start = system_clock::now();

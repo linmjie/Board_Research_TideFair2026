@@ -1,7 +1,9 @@
 #include "board.h"
 #include <bit>
 #include <cassert>
+#include <optional>
 #include <stdexcept>
+#include <type_traits>
 
 Board::Board() { //intial board at start of game
     this->w_general = board::WHITE_GENERAL;
@@ -133,6 +135,26 @@ void Board::makeMove(board::move move) {
     this->full_board = this->w_board | this->b_board;
     this->pieceArray[move.destination] = move.piece;
     this->pieceArray[move.origin] = board::none;
+}
+
+template<board::Move T>
+std::array<std::optional<T>, 49> Board::getAllMoves() {
+    assert(false);
+
+    std::array<std::optional<T>, 49> ret;
+    for (uint i = 0; i < 49; i++) {
+        board::piece piece = this->pieceArray[i];
+        ul moves = this->getMoveMask(i);
+        if (piece == board::none) {
+            ret[i] = std::nullopt;
+            continue;
+        }
+        else {
+            if constexpr (std::is_same_v<T, board::MoveVector>) {}
+            else if constexpr (std::is_same_v<T, bitboard>) {}
+        }
+    }
+    return ret;
 }
 
 //Removes illegal moves that result in general's vulnerability

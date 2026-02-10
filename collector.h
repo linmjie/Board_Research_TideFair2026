@@ -23,4 +23,8 @@ class Collector {
          * @param board The parent board from which the Collector will own
         */
         Collector(Board& board, uint controlMoveDepth, uint independentMoveDepth);
+
+        //Get stats on this collector
+        //CHANGE TYPING LATER
+        auto evalWin();
 };
