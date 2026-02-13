@@ -111,9 +111,7 @@ namespace board {
     ul simulateMove(ul board, move move);
 
     using MoveVector = std::vector<board::move>;
-    template<typename T>
-    concept Move = std::is_same_v<T, bitboard>
-                || std::is_same_v<T, MoveVector>;
+    using MovePair = std::pair<board::piece, bitboard>;
 }
 
 namespace magic {
@@ -196,8 +194,8 @@ class Board {
         /**
          * @tparam T Has to either be a bitboard(or any uint64) or a vector of move structs(board::MoveVector)
         */
-        template<board::Move T>
-        std::array<std::optional<T>, 49> getAllMoves();
+        std::array<std::optional<board::MovePair>, 49> getAllMovesAsBitboards();
+        std::array<std::optional<board::MoveVector>, 49> getAllMovesAsVector();
 
     protected:
         void addBitBoardToPieceArray(board::piece piece);

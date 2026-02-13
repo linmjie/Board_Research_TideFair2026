@@ -3,7 +3,7 @@
 #include <cassert>
 #include <optional>
 #include <stdexcept>
-#include <type_traits>
+#include <utility>
 
 Board::Board() { //intial board at start of game
     this->w_general = board::WHITE_GENERAL;
@@ -137,21 +137,40 @@ void Board::makeMove(board::move move) {
     this->pieceArray[move.origin] = board::none;
 }
 
-template<board::Move T>
-std::array<std::optional<T>, 49> Board::getAllMoves() {
-    assert(false);
-
-    std::array<std::optional<T>, 49> ret;
+std::array<std::optional<board::MovePair>, 49> Board::getAllMovesAsBitboards() {
+    std::array<std::optional<board::MovePair>, 49> ret;
     for (uint i = 0; i < 49; i++) {
         board::piece piece = this->pieceArray[i];
-        ul moves = this->getMoveMask(i);
-        if (piece == board::none) {
+        if (piece != board::none) {
+            ul moves = this->getMoveMask(i);
+            ret[i] = std::make_optional(std::make_pair(piece, moves));
+        }
+        else {
             ret[i] = std::nullopt;
             continue;
         }
+    }
+    return ret;
+}
+
+//Templates are terrible to read so copy and paste preferable
+std::array<std::optional<board::MoveVector>, 49> Board::getAllMovesAsVector() {
+    std::array<std::optional<board::MoveVector>, 49> ret;
+    for (uint i = 0; i < 49; i++) {
+        board::piece piece = this->pieceArray[i];
+        if (piece != board::none) {
+            ul moves = this->getMoveMask(i);
+            ret[i] = {};
+            for (uint j = 0; j < 49; j++) {
+                uint bit = (moves >> j) & 1;
+                if (bit) { //I am sorry for the indentation
+                    ret[i].value().emplace_back(piece, i, j);
+                }
+            }
+        }
         else {
-            if constexpr (std::is_same_v<T, board::MoveVector>) {}
-            else if constexpr (std::is_same_v<T, bitboard>) {}
+            ret[i] = std::nullopt;
+            continue;
         }
     }
     return ret;
