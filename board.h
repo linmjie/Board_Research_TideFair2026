@@ -6,7 +6,6 @@
 #include <mutex>
 #include <optional>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 using ul = unsigned long long;
@@ -146,7 +145,7 @@ namespace magic {
         
         //It's ideal to pre-generate the vectors once, so we pass them by const reference each function call
         //rather than constructing them inside of the function
-        std::optional<std::vector<ul>> validateMagic(
+        [[nodiscard]] std::optional<std::vector<ul>> validateMagic(
                 const std::vector<ul>& blockCombinations,
                 const std::vector<ul>& blockedRookMoves,
                 const ul multiplier, const uint shift, const uint minBits);
@@ -160,45 +159,44 @@ namespace magic {
         ul toLowBitNumber(ul rand1, ul rand2, ul rand3, ul rand4);
     }
 
-    std::string stringifyMagicData(const std::array<magic::gen::posMagics, 49>& magics);
+    [[nodiscard]] std::string stringifyMagicData(const std::array<magic::gen::posMagics, 49>& magics);
 }
 
-class Board {
-
+class Board 
+{
+private:
     std::array<board::piece, 49> pieceArray;
-
-    public:    
-        ul w_general;
-        ul w_officer;
-        ul w_rook;
-        ul w_knight;
-        ul w_pawn;
-        ul w_board;
-            
-        ul b_general;
-        ul b_officer;
-        ul b_rook;
-        ul b_knight;
-        ul b_pawn;
-        ul b_board;
-
-        ul full_board;
-
-        Board();
-
-        void makeMove(board::move move);
-        ul getBitBoard(board::piece piece);
-        ul getMoveMask(int pos);
-        auto getPieces() { return pieceArray; }
+    uint moveCount;
+public:    
+    ul w_general;
+    ul w_officer;
+    ul w_rook;
+    ul w_knight;
+    ul w_pawn;
+    ul w_board;
         
-        /**
-         * @tparam T Has to either be a bitboard(or any uint64) or a vector of move structs(board::MoveVector)
-        */
-        std::array<std::optional<board::MovePair>, 49> getAllMovesAsBitboards();
-        std::array<std::optional<board::MoveVector>, 49> getAllMovesAsVector();
+    ul b_general;
+    ul b_officer;
+    ul b_rook;
+    ul b_knight;
+    ul b_pawn;
+    ul b_board;
 
-    protected:
-        void addBitBoardToPieceArray(board::piece piece);
+    ul full_board;
+
+    Board();
+
+    void makeMove(board::move move);
+    [[nodiscard]] ul getBitBoard(board::piece piece) const;
+    [[nodiscard]] ul getMoveMask(int pos) const;
+    [[nodiscard]] auto getPieces() const { return pieceArray; }
+    [[nodiscard]] uint getMoveCount() const { return moveCount; }
+    
+    [[nodiscard]] std::array<std::optional<board::MovePair>, 49> getAllMovesAsBitboards() const;
+    [[nodiscard]] std::array<std::optional<board::MoveVector>, 49> getAllMovesAsVector() const;
+
+protected:
+    void addBitBoardToPieceArray(board::piece piece);
 };
 
 namespace board {
@@ -255,24 +253,24 @@ namespace generator {
     */
     ul superMoveMask(ul superPiece, ul fullBoard, ul opponentBoard, ul oppOfficers, ul oppGeneral);
 
-    ul getRookMoves(ul board, int rook);
+    [[nodiscard]] ul getRookMoves(ul board, int rook);
 
     //Eventually used to generate magics to precompute rook stuff
-    const std::vector<ul> rookBlocksGenerator(uint rook);
+    [[nodiscard]] const std::vector<ul> rookBlocksGenerator(uint rook);
 
-    ul rookBlockMask(uint rook, ul blockers);
+    [[nodiscard]] ul rookBlockMask(uint rook, ul blockers);
     
     //Used to create initilized masks
-    std::array<ul, 49> initMaskArray(std::function<ul(ul)> maskGenerator);
+    [[nodiscard]] std::array<ul, 49> initMaskArray(std::function<ul(ul)> maskGenerator);
     std::array<std::array<ul, 4>, 49> initGeneralMovesFields(std::function<std::array<ul, 4>(ul)> maskGenerator);
 
     //For the four possible general moves, generates the general fields for them
     std::array<ul, 4> generalMovesFieldsGenerator(ul general);
-    ul basicGeneralMask(ul general);
-    ul generalProtectionMask(ul general);
-    ul basicOfficerMask(ul officer);
-    ul basicRookMask(ul rook);
-    ul basicKnightMask(ul knight);
-    ul basicPawnMask(ul pawn);
-    ul basicBlackPawnMask(ul pawn);
+    [[nodiscard]] ul basicGeneralMask(ul general);
+    [[nodiscard]] ul generalProtectionMask(ul general);
+    [[nodiscard]] ul basicOfficerMask(ul officer);
+    [[nodiscard]] ul basicRookMask(ul rook);
+    [[nodiscard]] ul basicKnightMask(ul knight);
+    [[nodiscard]] ul basicPawnMask(ul pawn);
+    [[nodiscard]] ul basicBlackPawnMask(ul pawn);
 }

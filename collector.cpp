@@ -1,15 +1,81 @@
 #include "board.h"
+#include "bot.h"
+#include <iomanip>
+#include <iostream>
+#include <optional>
 #include <random>
 #include "collector.h"
 
 template<Control C, Independent I>
 Collector<C, I>::Collector(Board& board, uint controlMoveDepth, uint independentMoveDepth) 
-    :board(board) 
+    : board(board) 
 {
     std::mt19937 rng(std::random_device{}());
     std::bernoulli_distribution dist(0.5);
-    bool controlBotIsWhite = dist(rng);
+    const bool controlBotIsWhite = dist(rng);
 
     this->controlBot = C(board, controlBotIsWhite, controlMoveDepth);
     this->independentBot = I(board, !controlBotIsWhite, independentMoveDepth);
+}
+
+template<Control C, Independent I>
+Bot::WinInfo Collector<C, I>::evalWin() {
+    bool controlsTurn = this->controlBot.isWhite();
+    //once turnsLeft reaches 0, it becomes a draw
+    while (this->board.getMoveCount() < 100) {
+        using OptMove = std::optional<board::move>;
+        OptMove optMove;
+        if (controlsTurn) optMove = controlBot.getBestMove();
+        else optMove = independentBot.getBestMove();
+        if (!optMove.has_value()) {
+        } else {
+            board.makeMove(optMove.value());
+        }
+        //Do more stuff later I guess
+        bool gameFinished;
+        if (gameFinished) {
+            if (controlsTurn) return Bot::WinInfo::TreatmentLoss;
+            else return Bot::WinInfo::TreatmentWin;
+        }
+        controlsTurn = !controlsTurn;
+    }
+    return Bot::WinInfo::Draw;
+}
+
+template<Control C, Independent I>
+MassCollector<C, I>::MassCollector(std::string csvFile, 
+        uint controlMoveDepth,
+        uint minIndependentMoveDepth, uint maxIndependentMoveDepth)
+    : controlMoveDepth(controlMoveDepth), 
+    minIndependentMoveDepth(minIndependentMoveDepth),
+    maxIndependentMoveDepth(maxIndependentMoveDepth)
+{
+    this->output.open(csvFile);
+    if (!this->output.is_open()) {
+        std::cerr << "csv file: " << csvFile << " could not be opened" << std::endl;
+    } else {
+        this->output << "control_move_depth,treatment_move_depth,trials,treatment_wins,treatment_losses,treatment_win_rate,treatment_draws" << '\n';
+    }
+    //inclusive range
+    uint range = maxIndependentMoveDepth - minIndependentMoveDepth + 1;
+    this->csvRows.reserve(range);
+    for (uint i = 0; i < range; i++) {
+        this->csvRows.push_back({
+            .controlMoveDepth = controlMoveDepth,
+            .treatmentMoveDepth = minIndependentMoveDepth + i,
+        });
+    }
+}
+
+template<Control C, Independent I>
+MassCollector<C, I>::~MassCollector() {
+    for (const CsvRow& data : this->csvRows) {
+        this->output << data.controlMoveDepth 
+                     << data.treatmentMoveDepth 
+                     << data.treatmentWins
+                     << data.treatmentLosses 
+                     << std::fixed << std::setprecision(2) << data.treatmentWinRate << std::defaultfloat
+                     << data.treatmentDraws << '\n';
+    }
+    this->output.close();
 }

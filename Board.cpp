@@ -5,7 +5,10 @@
 #include <stdexcept>
 #include <utility>
 
-Board::Board() { //intial board at start of game
+//intial board at start of game
+Board::Board() 
+    :moveCount(0)
+{
     this->w_general = board::WHITE_GENERAL;
     this->w_officer = board::WHITE_OFFICER;
     this->w_rook = board::WHITE_ROOK;
@@ -44,7 +47,7 @@ void Board::addBitBoardToPieceArray(board::piece piece) {
     }
 }
 
-ul Board::getMoveMask(int pos) {
+ul Board::getMoveMask(int pos) const{
     using namespace board; 
 
     piece piece = this->pieceArray[pos];
@@ -64,7 +67,7 @@ ul Board::getMoveMask(int pos) {
     assert(false);
 }
 
-ul Board::getBitBoard(board::piece piece) {
+ul Board::getBitBoard(board::piece piece) const {
     switch (piece) {
         case board::w_general: return this->w_general;
         case board::w_officer: return this->w_officer;
@@ -83,6 +86,7 @@ ul Board::getBitBoard(board::piece piece) {
 }
 
 void Board::makeMove(board::move move) {
+    this->moveCount++;
     ul oldPiece = 1ULL << move.origin;
     ul newPiece = 1ULL << move.destination;
 
@@ -137,7 +141,7 @@ void Board::makeMove(board::move move) {
     this->pieceArray[move.origin] = board::none;
 }
 
-std::array<std::optional<board::MovePair>, 49> Board::getAllMovesAsBitboards() {
+std::array<std::optional<board::MovePair>, 49> Board::getAllMovesAsBitboards() const {
     std::array<std::optional<board::MovePair>, 49> ret;
     for (uint i = 0; i < 49; i++) {
         board::piece piece = this->pieceArray[i];
@@ -154,7 +158,7 @@ std::array<std::optional<board::MovePair>, 49> Board::getAllMovesAsBitboards() {
 }
 
 //Templates are terrible to read so copy and paste preferable
-std::array<std::optional<board::MoveVector>, 49> Board::getAllMovesAsVector() {
+std::array<std::optional<board::MoveVector>, 49> Board::getAllMovesAsVector() const {
     std::array<std::optional<board::MoveVector>, 49> ret;
     for (uint i = 0; i < 49; i++) {
         board::piece piece = this->pieceArray[i];
@@ -164,7 +168,12 @@ std::array<std::optional<board::MoveVector>, 49> Board::getAllMovesAsVector() {
             for (uint j = 0; j < 49; j++) {
                 uint bit = (moves >> j) & 1;
                 if (bit) { //I am sorry for the indentation
-                    ret[i].value().emplace_back(piece, i, j);
+                    byte origin = static_cast<byte>(i);
+
+                    byte destination = static_cast<byte>(j);
+                    ret[i].value().push_back(board::move{
+                            piece, origin, destination}
+                    );
                 }
             }
         }

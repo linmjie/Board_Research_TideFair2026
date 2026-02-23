@@ -11,6 +11,6 @@ namespace test {
     void allUniqueRookBlockers();
     void magicGeneration(std::mutex& mtx, magic::gen::posMagics& thisMagic, const uint pos);
 
-    uint countUniqueRookBlockers(uint pos);
+   [[nodiscard]] uint countUniqueRookBlockers(uint pos);
 }
 
