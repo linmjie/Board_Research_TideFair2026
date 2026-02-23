@@ -1,7 +1,9 @@
 #include <cassert>
+#include <random>
 #include <set>
 #include <iostream>
 #include "board.h"
+#include "bot.h"
 #include "tests.h"
 //Not a robust testing system, just wanted to declutter main method
 
@@ -62,4 +64,15 @@ uint test::countUniqueRookBlockers(uint pos) {
         blockedRookMoves.insert(rookMove);
     }
     return blockedRookMoves.size();
+}
+
+Bot::WinInfo test::randomWinInfo() {
+    using enum Bot::WinInfo;
+    std::random_device rand;
+    std::mt19937 gen(rand());
+    std::uniform_real_distribution<float> dist(0.0F, 1.0F);
+    float random = dist(gen);
+    if (random > 0.45F && random < 0.55F) return Draw;
+    else if (random < 0.5F) return TreatmentLoss;
+    else return TreatmentWin;
 }

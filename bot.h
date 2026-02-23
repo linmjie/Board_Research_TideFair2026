@@ -26,6 +26,9 @@ public:
     };
 };
 
-class RandomBot : public Bot {
+class RandomBot : public Bot 
+{
+public:
+    using Bot::Bot;
     [[nodiscard]] std::optional<board::move> getBestMove() override;
 };

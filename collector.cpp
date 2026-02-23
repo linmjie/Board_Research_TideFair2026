@@ -13,26 +13,25 @@ Collector<C, I>::Collector(Board& board, uint controlMoveDepth, uint independent
     std::mt19937 rng(std::random_device{}());
     std::bernoulli_distribution dist(0.5);
     const bool controlBotIsWhite = dist(rng);
-
-    this->controlBot = C(board, controlBotIsWhite, controlMoveDepth);
-    this->independentBot = I(board, !controlBotIsWhite, independentMoveDepth);
+    this->controlBot.emplace(board, controlBotIsWhite, controlMoveDepth);
+    this->independentBot.emplace(board, !controlBotIsWhite, independentMoveDepth);
 }
 
 template<Control C, Independent I>
 Bot::WinInfo Collector<C, I>::evalWin() {
-    bool controlsTurn = this->controlBot.isWhite();
+    bool controlsTurn = this->controlBot.value().isWhite();
     //once turnsLeft reaches 0, it becomes a draw
     while (this->board.getMoveCount() < 100) {
         using OptMove = std::optional<board::move>;
         OptMove optMove;
-        if (controlsTurn) optMove = controlBot.getBestMove();
-        else optMove = independentBot.getBestMove();
+        if (controlsTurn) optMove = controlBot.value().getBestMove();
+        else optMove = independentBot.value().getBestMove();
         if (!optMove.has_value()) {
         } else {
             board.makeMove(optMove.value());
         }
         //Do more stuff later I guess
-        bool gameFinished;
+        bool gameFinished = false;
         if (gameFinished) {
             if (controlsTurn) return Bot::WinInfo::TreatmentLoss;
             else return Bot::WinInfo::TreatmentWin;
@@ -70,12 +69,23 @@ MassCollector<C, I>::MassCollector(std::string csvFile,
 template<Control C, Independent I>
 MassCollector<C, I>::~MassCollector() {
     for (const CsvRow& data : this->csvRows) {
-        this->output << data.controlMoveDepth 
-                     << data.treatmentMoveDepth 
-                     << data.treatmentWins
-                     << data.treatmentLosses 
-                     << std::fixed << std::setprecision(2) << data.treatmentWinRate << std::defaultfloat
+        this->output << data.controlMoveDepth << ','
+                     << data.treatmentMoveDepth << ','
+                     << data.trials << ','
+                     << data.treatmentWins << ','
+                     << data.treatmentLosses << ','
+                     << std::fixed << std::setprecision(2) << data.treatmentWinRate << std::defaultfloat << ','
                      << data.treatmentDraws << '\n';
     }
     this->output.close();
 }
+
+template<Control C, Independent I>
+void MassCollector<C, I>::activate() {
+    std::cout << "Starting data collection!\n";
+    this->manager();
+}
+
+//Temp fix
+template class MassCollector<RandomBot, RandomBot>;
+template class Collector<RandomBot, RandomBot>;

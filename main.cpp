@@ -3,14 +3,18 @@
 #include <chrono>
 #include <unistd.h>
 #include "board.h"
+#include "bot.h"
 #include "tests.h"
 #include "collector.h"
 
 int mainMethod(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) std::cout << "arg " << i << ": " << argv[i] << '\n';
-    Board board;
-    magic::gen::manager("DELETE_THIS", "DELETE_THIS_TOO");
-
+    if (argc < 3) {
+        std::cerr << "Feed arguments for lower and upper ranges" << std::endl;
+        return 1;
+    }
+    MassCollector<RandomBot, RandomBot> collector("DELETE.csv", 15, std::atoi(argv[1]), std::atoi(argv[2]));
+    collector.activate();
     return 0;
 }
 

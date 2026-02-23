@@ -18,8 +18,8 @@ class Collector
 {
 private:
     Board& board;
-    C& controlBot;
-    I& independentBot;
+    std::optional<C> controlBot;
+    std::optional<I> independentBot;
 public:
     /**
     * @param board The parent board from which the Collector will own
@@ -55,11 +55,11 @@ private:
     const uint maxIndependentMoveDepth;
     std::vector<CsvRow> csvRows;
     void manager();
-    void boardWorker(std::mutex& mtx, CsvRow& row);
 public:
     MassCollector(
             std::string csvFile, 
             uint controlMoveDepth,
             uint minIndependentMoveDepth, uint maxIndependentMoveDepth);
+    void activate();
     ~MassCollector();
 };
