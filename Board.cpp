@@ -7,8 +7,9 @@
 
 //intial board at start of game
 Board::Board() 
-    :moveCount(0)
+    : moveCount(0), w_generalPos(3), b_generalPos(45) //hard-coded numbers
 {
+    //I didn't know about initalizer list when I made this
     this->w_general = board::WHITE_GENERAL;
     this->w_officer = board::WHITE_OFFICER;
     this->w_rook = board::WHITE_ROOK;
@@ -141,6 +142,46 @@ void Board::makeMove(board::move move) {
     this->pieceArray[move.origin] = board::none;
 }
 
+bool Board::isCheckmated(bool sideIsWhite) const {
+    return this->getAllMovesAsVector(sideIsWhite).empty();
+    // auto moveOptArr = this->getAllMovesAsBitboards();
+    // bool ret = true;
+    // for (auto& moveOpt : moveOptArr) {
+    //     if (moveOpt.has_value()) ret = false;
+    // }
+    // return ret;
+}
+
+bool Board::moveIsCheck(bool sideIsWhite, board::move move) const {
+    byte dest = move.destination;
+    return ((this->b_generalPos == dest) && sideIsWhite) 
+        || ((this->w_generalPos == dest) && !sideIsWhite);
+}
+
+board::MoveVector Board::getAllMovesAsVector(bool sideIsWhite) const {
+    board::MoveVector ret;
+    for (uint i = 0; i < 49; i++) {
+        board::piece piece = this->pieceArray[i];
+        if (piece == board::none || !board::sideMatched(sideIsWhite, piece)) {
+            continue;
+        }
+        else {
+            ul moves = this->getMoveMask(i);
+            for (uint j = 0; j < 49; j++) {
+                uint bit = (moves >> j) & 1;
+                if (bit) { //I am sorry for the indentation
+                    byte origin = static_cast<byte>(i);
+                    byte destination = static_cast<byte>(j);
+                    ret.push_back(board::move{
+                            piece, origin, destination}
+                    );
+                }
+            }
+        }
+    }
+    return ret;
+}
+
 std::array<std::optional<board::MovePair>, 49> Board::getAllMovesAsBitboards() const {
     std::array<std::optional<board::MovePair>, 49> ret;
     for (uint i = 0; i < 49; i++) {
@@ -158,35 +199,59 @@ std::array<std::optional<board::MovePair>, 49> Board::getAllMovesAsBitboards() c
 }
 
 //Templates are terrible to read so copy and paste preferable
-std::array<std::optional<board::MoveVector>, 49> Board::getAllMovesAsVector() const {
+std::array<std::optional<board::MoveVector>, 49> Board::getAllMovesAsVectorsUnderTiles() const {
     std::array<std::optional<board::MoveVector>, 49> ret;
     for (uint i = 0; i < 49; i++) {
         board::piece piece = this->pieceArray[i];
-        if (piece != board::none) {
+        if (piece == board::none) {
+            ret[i] = std::nullopt;
+            continue;
+        }
+        else {
             ul moves = this->getMoveMask(i);
             ret[i] = {};
             for (uint j = 0; j < 49; j++) {
+                bool foundOne = false;
                 uint bit = (moves >> j) & 1;
                 if (bit) { //I am sorry for the indentation
+                    foundOne = true;
                     byte origin = static_cast<byte>(i);
-
                     byte destination = static_cast<byte>(j);
                     ret[i].value().push_back(board::move{
                             piece, origin, destination}
                     );
                 }
+                if (!foundOne) {
+                    ret[i] = std::nullopt;
+                }
             }
-        }
-        else {
-            ret[i] = std::nullopt;
-            continue;
         }
     }
     return ret;
 }
 
+bool board::sideMatched(bool sideIsWhite, board::piece piece) {
+    return sideIsWhite ^ !board::pieceIsWhite(piece);
+}
+
+bool board::pieceIsWhite(board::piece piece) {
+    switch (piece) {
+        case w_general: return true;
+        case w_officer: return true;
+        case w_rook: return true;
+        case w_knight: return true;
+        case w_pawn: return true;
+        case b_general: return false;
+        case b_officer: return false;
+        case b_rook: return false;
+        case b_knight: return false;
+        case b_pawn: return false;
+        case none: throw "none";
+    }
+}
+
 //Removes illegal moves that result in general's vulnerability
-ul getCheckCleanedBoard(const Board *board, board::piece piece, int origin, ul dirtyBoard, bool sideIsWhite) {
+static ul getCheckCleanedBoard(const Board *board, board::piece piece, int origin, ul dirtyBoard, bool sideIsWhite) {
     ul cleanedBoard = dirtyBoard;
     int generalPos;
     if (sideIsWhite)

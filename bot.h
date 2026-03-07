@@ -32,3 +32,11 @@ public:
     using Bot::Bot;
     [[nodiscard]] std::optional<board::move> getBestMove() override;
 };
+
+class ScienceBot : public Bot 
+{
+public:
+    using Bot::Bot;
+    [[nodiscard]] std::optional<board::move> getBestMove() override;
+    [[nodiscard]] double branchedMoveEval(const Board& board, const uint searchDepth);
+};

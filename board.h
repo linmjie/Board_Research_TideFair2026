@@ -80,11 +80,6 @@ namespace board {
     //Prints all 49 single piece bitboard transformations given transformer function
     void printAllPosTransforms(std::function<ul(ul)> transformer); 
 
-    enum side {
-        white,
-        black
-    };
-
     enum piece {
         w_general,
         w_officer,
@@ -106,6 +101,9 @@ namespace board {
         byte origin; //An integer position, not a bitboard
         byte destination; //An integer position, not a bitboard
     };
+    
+    [[nodiscard]] bool sideMatched(bool sideIsWhite, board::piece piece);
+    [[nodiscard]] bool pieceIsWhite(board::piece piece);
 
     ul simulateMove(ul board, move move);
 
@@ -167,6 +165,9 @@ class Board
 private:
     std::array<board::piece, 49> pieceArray;
     uint moveCount;
+
+    uint w_generalPos;
+    uint b_generalPos;
 public:    
     ul w_general;
     ul w_officer;
@@ -192,8 +193,11 @@ public:
     [[nodiscard]] auto getPieces() const { return pieceArray; }
     [[nodiscard]] uint getMoveCount() const { return moveCount; }
     
+    [[nodiscard]] bool isCheckmated(bool sideIsWhite) const;
+    [[nodiscard]] bool moveIsCheck(bool sideIsWhite, board::move move) const;
     [[nodiscard]] std::array<std::optional<board::MovePair>, 49> getAllMovesAsBitboards() const;
-    [[nodiscard]] std::array<std::optional<board::MoveVector>, 49> getAllMovesAsVector() const;
+    [[nodiscard]] std::array<std::optional<board::MoveVector>, 49> getAllMovesAsVectorsUnderTiles() const;
+    [[nodiscard]] board::MoveVector getAllMovesAsVector(bool sideIsWhite) const;
 
 protected:
     void addBitBoardToPieceArray(board::piece piece);

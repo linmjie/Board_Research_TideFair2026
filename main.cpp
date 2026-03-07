@@ -13,7 +13,8 @@ int mainMethod(int argc, char *argv[]) {
         std::cerr << "Feed arguments for lower and upper ranges" << std::endl;
         return 1;
     }
-    MassCollector<RandomBot, RandomBot> collector("DELETE.csv", 15, std::atoi(argv[1]), std::atoi(argv[2]));
+    MassCollector<RandomBot, RandomBot> collector("DELETE.csv", 15, 
+            std::atoi(argv[1]), std::atoi(argv[2]));
     collector.activate();
     return 0;
 }

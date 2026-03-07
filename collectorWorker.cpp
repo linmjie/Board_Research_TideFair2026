@@ -19,8 +19,7 @@ static void boardWorker(std::mutex& mtx, CsvRow& row) {
     while (!sigIntercepted) {
         Board board;
         Collector<C, I> collector(board, row.controlMoveDepth, row.treatmentMoveDepth);
-        Bot::WinInfo info = test::randomWinInfo();
-        // Bot::WinInfo info = collector.evalWin(); //I probably should've just made collector into a function
+        Bot::WinInfo info = collector.evalWin(); //I probably should've just made collector into a function
         std::lock_guard<std::mutex> guard(mtx);
         switch (info) {
             case Bot::WinInfo::TreatmentWin: row.treatmentWins++; break;
