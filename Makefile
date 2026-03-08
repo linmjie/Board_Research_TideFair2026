@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -g -Wall -Wextra
+CXXFLAGS = -std=c++20 -Wall -Wextra -O3 -DNDEBUG
 TARGET = output 
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)

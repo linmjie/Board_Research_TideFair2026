@@ -10,13 +10,14 @@
 int mainMethod(int argc, char *argv[]) {
     std::cout << "GENERAL_FIELDS size: " << board::GENERAL_FIELDS.size() << '\n';
     for (int i = 1; i < argc; i++) std::cout << "arg " << i << ": " << argv[i] << '\n';
-    if (argc < 4) {
+    if (argc < 5) {
         std::cerr << "Feed arguments for lower and upper ranges" << std::endl;
         return 1;
     }
-    MassCollector<ScienceBot, ScienceBot> collector("DELETE.csv",
-            std::atoi(argv[1]), 
-            std::atoi(argv[2]), std::atoi(argv[3]));
+    MassCollector<ScienceBot, ScienceBot> collector(
+            std::string(argv[1]).append(".csv"),
+            std::atoi(argv[2]), 
+            std::atoi(argv[3]), std::atoi(argv[4]));
     collector.activate();
     return 0;
 }

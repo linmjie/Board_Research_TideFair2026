@@ -74,7 +74,7 @@ std::optional<board::move> ScienceBot::getBestMove() {
     auto moves = this->board.getAllMovesAsVector(this->sideIsWhite);
     Board boardCopy(board);
     score::sortMoves(&moves, boardCopy, this->sideIsWhite);
-    std::cout << "Move count from getBestMove: " << moves.size() << std::endl;
+    // std::cout << "Move count from getBestMove: " << moves.size() << std::endl;
 
     if (moves.empty()) {
         return std::nullopt;
