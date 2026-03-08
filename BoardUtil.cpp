@@ -1,4 +1,5 @@
 #include "board.h"
+#include <bit>
 #include <bitset>
 #include <ios>
 #include <sstream>
@@ -32,6 +33,10 @@ void board::forEachPos(std::function<void(ul, std::function<ul(ul)>)> user, std:
 
 void board::printAllPosTransforms(std::function<ul(ul)> transformer) {
     board::forEachPos(printBitBoardTransform, transformer);
+}
+
+uint board::getPos(ul num) {
+    return num ? std::countr_zero(num) : 0;
 }
 
 std::string magic::stringifyMagicData(const std::array<magic::gen::posMagics, 49>& magics) {

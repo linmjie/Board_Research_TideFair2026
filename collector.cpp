@@ -19,6 +19,7 @@ Collector<C, I>::Collector(Board& board, uint controlMoveDepth, uint independent
 
 template<Control C, Independent I>
 Bot::WinInfo Collector<C, I>::evalWin() {
+    assert(this->controlBot.has_value() && this->independentBot.has_value());
     bool controlsTurn = this->controlBot.value().isWhite();
     //once turnsLeft reaches 0, it becomes a draw
     while (this->board.getMoveCount() < 100) {
@@ -27,14 +28,20 @@ Bot::WinInfo Collector<C, I>::evalWin() {
         if (controlsTurn) optMove = controlBot.value().getBestMove();
         else optMove = independentBot.value().getBestMove();
         if (!optMove.has_value()) {
-        } else {
-            board.makeMove(optMove.value());
+            std::cerr << "Found a null opt move" << '\n';
+            //no moves = mated or stalemated, treat as loss for the side that can't move
+            if (controlsTurn) return Bot::WinInfo::TreatmentWin;
+            else return Bot::WinInfo::TreatmentLoss;
         }
-        //Do more stuff later I guess
-        bool gameFinished = false;
-        if (gameFinished) {
-            if (controlsTurn) return Bot::WinInfo::TreatmentLoss;
-            else return Bot::WinInfo::TreatmentWin;
+        board.makeMove(optMove.value());
+
+        bool justMovedControl = controlsTurn;
+        if (justMovedControl) {
+            if (board.isCheckmated(this->independentBot.value().isWhite()))
+                return Bot::WinInfo::TreatmentLoss;
+        } else {
+            if (board.isCheckmated(this->controlBot.value().isWhite()))
+                return Bot::WinInfo::TreatmentWin;
         }
         controlsTurn = !controlsTurn;
     }
@@ -89,3 +96,5 @@ void MassCollector<C, I>::activate() {
 //Temp fix
 template class MassCollector<RandomBot, RandomBot>;
 template class Collector<RandomBot, RandomBot>;
+template class MassCollector<ScienceBot, ScienceBot>;
+template class Collector<ScienceBot, ScienceBot>;

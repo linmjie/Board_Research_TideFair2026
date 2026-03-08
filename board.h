@@ -1,11 +1,14 @@
 #pragma once
 
 #include <array>
+#include <bit>
 #include <functional>
 #include <cassert>
 #include <mutex>
 #include <optional>
+#include <stack>
 #include <string>
+#include <utility>
 #include <vector>
 
 using ul = unsigned long long;
@@ -79,6 +82,8 @@ namespace board {
 
     //Prints all 49 single piece bitboard transformations given transformer function
     void printAllPosTransforms(std::function<ul(ul)> transformer); 
+
+    uint getPos(ul num);
 
     enum piece {
         w_general,
@@ -168,6 +173,13 @@ private:
 
     uint w_generalPos;
     uint b_generalPos;
+    struct MoveRecord {
+        board::move move;
+        board::piece capturedPiece; //Can be none
+    };
+    std::stack<MoveRecord> moveHistory;
+
+    void cleanBitBoards();
 public:    
     ul w_general;
     ul w_officer;
@@ -188,12 +200,15 @@ public:
     Board();
 
     void makeMove(board::move move);
+    void unmakeMove();
+
     [[nodiscard]] ul getBitBoard(board::piece piece) const;
     [[nodiscard]] ul getMoveMask(int pos) const;
     [[nodiscard]] auto getPieces() const { return pieceArray; }
     [[nodiscard]] uint getMoveCount() const { return moveCount; }
     
     [[nodiscard]] bool isCheckmated(bool sideIsWhite) const;
+    [[nodiscard]] std::pair<uint, uint> getCheckCount() const;
     [[nodiscard]] bool moveIsCheck(bool sideIsWhite, board::move move) const;
     [[nodiscard]] std::array<std::optional<board::MovePair>, 49> getAllMovesAsBitboards() const;
     [[nodiscard]] std::array<std::optional<board::MoveVector>, 49> getAllMovesAsVectorsUnderTiles() const;
@@ -257,7 +272,7 @@ namespace generator {
     */
     ul superMoveMask(ul superPiece, ul fullBoard, ul opponentBoard, ul oppOfficers, ul oppGeneral);
 
-    [[nodiscard]] ul getRookMoves(ul board, int rook);
+    [[nodiscard]] ul getRookMoves(ul board, uint rook);
 
     //Eventually used to generate magics to precompute rook stuff
     [[nodiscard]] const std::vector<ul> rookBlocksGenerator(uint rook);

@@ -15,7 +15,7 @@ const std::array<std::array<ul, 4>, 49> board::GENERAL_MOVE_FIELDS = generator::
 std::array<ul, 49> generator::initMaskArray(std::function<ul(ul)> maskGenerator) {
     std::array<ul, 49> ret;
     board::forEachPos([&ret](ul pos, auto transformer) {
-            ret.at(std::countr_zero(pos)) = transformer(pos) & board::FULL_BOARD; }, 
+            ret.at(board::getPos(pos)) = transformer(pos) & board::FULL_BOARD; }, 
             maskGenerator);
     return ret;
 }
@@ -62,7 +62,7 @@ bool generator::isAttacked(const Board *board, int pos, bool sideIsWhite) {
     //Special case for generals and officers because of the field dynamic
     //I think this could be magic'ed like rook blockers
     //Most likely the source of anny incorrect logic'ing
-    int oppGeneralPos = std::countr_zero(oppGeneral);
+    uint oppGeneralPos = board::getPos(oppGeneral);
     ul oppField = board::GENERAL_FIELDS[oppGeneralPos];
     ul oppGeneralMove = board::GENERAL_MOVES[pos];
     for (int i = 0; i < 49; i++) {
@@ -99,11 +99,11 @@ ul board::simulateMove(ul board, board::move move) {
     return (board ^ oldPiece) | newPiece;
 }
 
-ul generator::getRookMoves(ul board, int pos) {
+ul generator::getRookMoves(ul board, uint pos) {
+    assert(pos < board::ROOK_MOVES.size());
     ul rookMoves = board::ROOK_MOVES[pos];
-    ul rook = 1ULL << pos;
     board &= rookMoves;
-    return generator::rookBlockMask(rook, board);
+    return generator::rookBlockMask(pos, board);
 }
 
 const std::vector<ul> generator::rookBlocksGenerator(uint rookPos) {

@@ -38,5 +38,8 @@ class ScienceBot : public Bot
 public:
     using Bot::Bot;
     [[nodiscard]] std::optional<board::move> getBestMove() override;
-    [[nodiscard]] double branchedMoveEval(const Board& board, const uint searchDepth);
+    [[nodiscard]] double branchedMoveEval(
+            Board& board,
+            const uint searchDepth,
+            double alpha, double beta);
 };

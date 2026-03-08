@@ -1,9 +1,10 @@
 #include "board.h"
-#include <limits>
+#include <iostream>
+#include <memory>
 #include <optional>
 #include <random>
-#include <utility>
 #include "bot.h"
+#include "score.h"
 
 Bot::Bot(const Board& board, bool sideIsWhite, uint maxMoveDepth)
     : board(board), maxMoveDepth(maxMoveDepth), sideIsWhite(sideIsWhite)
@@ -25,37 +26,45 @@ std::optional<board::move> RandomBot::getBestMove() {
     return moveVec.at(distrib(gen));
 }
 
-constexpr double INF = std::numeric_limits<double>::infinity();
-constexpr std::pair<board::move, double> NO_MOVE = std::make_pair(board::move{}, -INF);
 
-
-
-double ScienceBot::branchedMoveEval(const Board& board, const uint searchDepth) {
+double ScienceBot::branchedMoveEval(
+        Board& board,
+        const uint searchDepth, 
+        double alpha, double beta) 
+{
     assert(searchDepth <= this->maxMoveDepth);
-    bool emulateWhite = (searchDepth % 2 == 1) == this->sideIsWhite;
+    const bool emulateWhite = (searchDepth % 2 == 1) == this->sideIsWhite;
+    // const bool emulatedSelf = emulateWhite ^ !this->sideIsWhite;
 
     if (searchDepth >= this->maxMoveDepth) {
         return score::final(board);
     }
 
-    auto moves = board.getAllMovesAsVector(emulateWhite);
+    auto moves = std::make_unique<board::MoveVector>(board.getAllMovesAsVector(emulateWhite));
 
-    if (moves.empty()) {
+    if (moves->empty()) {
         return emulateWhite ? -INF : INF;
     }
 
+    score::sortMoves(moves.get(), board, emulateWhite);
+
     double bestScore = emulateWhite ? -INF : INF;
 
-    for (auto& validMove : moves) {
-        Board mutatedBoard(board);
-        mutatedBoard.makeMove(validMove);
-
-        double score = branchedMoveEval(mutatedBoard, searchDepth + 1);
+    for (auto& validMove : *moves) {
+        board.makeMove(validMove);
+        const double score = branchedMoveEval(board, searchDepth + 1, alpha, beta);
+        board.unmakeMove();
 
         if (emulateWhite) {
             if (score > bestScore) bestScore = score;
+            if (bestScore > alpha) alpha = bestScore;
         } else {
             if (score < bestScore) bestScore = score;
+            if (bestScore < beta) beta = bestScore;
+        }
+        if (beta <= alpha) {
+            // std::cout << "branched pruned\n";
+            break; // Branch pruned
         }
     }
     return bestScore;
@@ -63,6 +72,9 @@ double ScienceBot::branchedMoveEval(const Board& board, const uint searchDepth) 
 
 std::optional<board::move> ScienceBot::getBestMove() {
     auto moves = this->board.getAllMovesAsVector(this->sideIsWhite);
+    Board boardCopy(board);
+    score::sortMoves(&moves, boardCopy, this->sideIsWhite);
+    std::cout << "Move count from getBestMove: " << moves.size() << std::endl;
 
     if (moves.empty()) {
         return std::nullopt;
@@ -74,7 +86,7 @@ std::optional<board::move> ScienceBot::getBestMove() {
     for (auto& move : moves) {
         Board mutatedBoard(this->board);
         mutatedBoard.makeMove(move);
-        double score = branchedMoveEval(mutatedBoard, 1);
+        double score = branchedMoveEval(mutatedBoard, 1, -INF, INF);
 
         if (this->sideIsWhite) {
             if (score > bestScore) {

@@ -8,13 +8,15 @@
 #include "collector.h"
 
 int mainMethod(int argc, char *argv[]) {
+    std::cout << "GENERAL_FIELDS size: " << board::GENERAL_FIELDS.size() << '\n';
     for (int i = 1; i < argc; i++) std::cout << "arg " << i << ": " << argv[i] << '\n';
-    if (argc < 3) {
+    if (argc < 4) {
         std::cerr << "Feed arguments for lower and upper ranges" << std::endl;
         return 1;
     }
-    MassCollector<RandomBot, RandomBot> collector("DELETE.csv", 15, 
-            std::atoi(argv[1]), std::atoi(argv[2]));
+    MassCollector<ScienceBot, ScienceBot> collector("DELETE.csv",
+            std::atoi(argv[1]), 
+            std::atoi(argv[2]), std::atoi(argv[3]));
     collector.activate();
     return 0;
 }

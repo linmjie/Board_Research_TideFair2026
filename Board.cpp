@@ -1,6 +1,7 @@
 #include "board.h"
 #include <bit>
 #include <cassert>
+#include <iostream>
 #include <optional>
 #include <stdexcept>
 #include <utility>
@@ -38,6 +39,7 @@ Board::Board()
     this->addBitBoardToPieceArray(board::b_rook);
     this->addBitBoardToPieceArray(board::b_knight);
     this->addBitBoardToPieceArray(board::b_pawn);
+    this->cleanBitBoards();
 }
 
 void Board::addBitBoardToPieceArray(board::piece piece) {
@@ -85,61 +87,114 @@ ul Board::getBitBoard(board::piece piece) const {
 
     assert(false);
 }
-
 void Board::makeMove(board::move move) {
+    assert(move.destination < 49 && move.origin < 49);
+    this->moveHistory.push({ move, this->pieceArray[move.destination] });
     this->moveCount++;
     ul oldPiece = 1ULL << move.origin;
     ul newPiece = 1ULL << move.destination;
 
+    if (this->pieceArray[move.destination] != board::none) {
+        ul capturedBit = newPiece;
+        // capturedBit |= ~board::FULL_BOARD;
+        switch (this->pieceArray[move.destination]) {
+            case board::w_general:  this->w_general &= ~capturedBit; this->w_board &= ~capturedBit; break;
+            case board::w_officer:  this->w_officer &= ~capturedBit; this->w_board &= ~capturedBit; break;
+            case board::w_rook:     this->w_rook    &= ~capturedBit; this->w_board &= ~capturedBit; break;
+            case board::w_knight:   this->w_knight  &= ~capturedBit; this->w_board &= ~capturedBit; break;
+            case board::w_pawn:     this->w_pawn    &= ~capturedBit; this->w_board &= ~capturedBit; break;
+            case board::b_general:  this->b_general &= ~capturedBit; this->b_board &= ~capturedBit; break;
+            case board::b_officer:  this->b_officer &= ~capturedBit; this->b_board &= ~capturedBit; break;
+            case board::b_rook:     this->b_rook    &= ~capturedBit; this->b_board &= ~capturedBit; break;
+            case board::b_knight:   this->b_knight  &= ~capturedBit; this->b_board &= ~capturedBit; break;
+            case board::b_pawn:     this->b_pawn    &= ~capturedBit; this->b_board &= ~capturedBit; break;
+            case board::none: break;
+        }
+    }
+
     switch (move.piece) {
-        case board::w_general:
-            this->w_general = (w_general ^ oldPiece) | newPiece;
-            this->w_board = (w_board ^ oldPiece) | newPiece;
-            break;
-        case board::w_officer:
-            this->w_officer = (w_officer ^ oldPiece) | newPiece;
-            this->w_board = (w_board ^ oldPiece) | newPiece;
-            break;
-        case board::w_rook:
-            this->w_rook= (w_rook ^ oldPiece) | newPiece;
-            this->w_board = (w_board ^ oldPiece) | newPiece;
-            break;
-        case board::w_knight:
-            this->w_knight = (w_knight ^ oldPiece) | newPiece;
-            this->w_board = (w_board ^ oldPiece) | newPiece;
-            break;
-        case board::w_pawn:
-            this->w_pawn = (w_pawn ^ oldPiece) | newPiece;
-            this->w_board = (w_board ^ oldPiece) | newPiece;
-            break;
-        case board::b_general:
-            this->b_general = (b_general ^ oldPiece) | newPiece;
-            this->b_board = (b_board ^ oldPiece) | newPiece;
-            break;
-        case board::b_officer:
-            this->b_officer = (b_officer ^ oldPiece) | newPiece;
-            this->b_board = (b_board ^ oldPiece) | newPiece;
-            break;
-        case board::b_rook:
-            this->b_rook = (b_rook ^ oldPiece) | newPiece;
-            this->b_board = (b_board ^ oldPiece) | newPiece;
-            break;
-        case board::b_knight:
-            this->b_knight = (b_knight ^ oldPiece) | newPiece;
-            this->b_board = (b_board ^ oldPiece) | newPiece;
-            break;
-        case board::b_pawn:
-            this->b_pawn = (b_pawn ^ oldPiece) | newPiece;
-            this->b_board = (b_board ^ oldPiece) | newPiece;
-            break;
-        case board::none:
-            throw std::invalid_argument("Cannot move a 'none' piece!");
-            break;
+        case board::w_general: this->w_general = (w_general ^ oldPiece) | newPiece; this->w_board = (w_board ^ oldPiece) | newPiece; break;
+        case board::w_officer: this->w_officer = (w_officer ^ oldPiece) | newPiece; this->w_board = (w_board ^ oldPiece) | newPiece; break;
+        case board::w_rook:    this->w_rook    = (w_rook    ^ oldPiece) | newPiece; this->w_board = (w_board ^ oldPiece) | newPiece; break;
+        case board::w_knight:  this->w_knight  = (w_knight  ^ oldPiece) | newPiece; this->w_board = (w_board ^ oldPiece) | newPiece; break;
+        case board::w_pawn:    this->w_pawn    = (w_pawn    ^ oldPiece) | newPiece; this->w_board = (w_board ^ oldPiece) | newPiece; break;
+        case board::b_general: this->b_general = (b_general ^ oldPiece) | newPiece; this->b_board = (b_board ^ oldPiece) | newPiece; break;
+        case board::b_officer: this->b_officer = (b_officer ^ oldPiece) | newPiece; this->b_board = (b_board ^ oldPiece) | newPiece; break;
+        case board::b_rook:    this->b_rook    = (b_rook    ^ oldPiece) | newPiece; this->b_board = (b_board ^ oldPiece) | newPiece; break;
+        case board::b_knight:  this->b_knight  = (b_knight  ^ oldPiece) | newPiece; this->b_board = (b_board ^ oldPiece) | newPiece; break;
+        case board::b_pawn:    this->b_pawn    = (b_pawn    ^ oldPiece) | newPiece; this->b_board = (b_board ^ oldPiece) | newPiece; break;
+        case board::none: throw std::invalid_argument("Cannot move a 'none' piece!"); break;
     }
 
     this->full_board = this->w_board | this->b_board;
     this->pieceArray[move.destination] = move.piece;
     this->pieceArray[move.origin] = board::none;
+    this->cleanBitBoards();
+}
+
+void Board::unmakeMove() {
+    assert(!this->moveHistory.empty());
+    const MoveRecord record = this->moveHistory.top();
+    this->moveHistory.pop();
+    this->moveCount--;
+
+    const board::move& move = record.move;
+    ul oldPiece = 1ULL << move.origin;
+    ul newPiece = 1ULL << move.destination;
+
+    switch (move.piece) {
+        case board::w_general: this->w_general = (w_general ^ newPiece) | oldPiece; this->w_board = (w_board ^ newPiece) | oldPiece; break;
+        case board::w_officer: this->w_officer = (w_officer ^ newPiece) | oldPiece; this->w_board = (w_board ^ newPiece) | oldPiece; break;
+        case board::w_rook:    this->w_rook    = (w_rook    ^ newPiece) | oldPiece; this->w_board = (w_board ^ newPiece) | oldPiece; break;
+        case board::w_knight:  this->w_knight  = (w_knight  ^ newPiece) | oldPiece; this->w_board = (w_board ^ newPiece) | oldPiece; break;
+        case board::w_pawn:    this->w_pawn    = (w_pawn    ^ newPiece) | oldPiece; this->w_board = (w_board ^ newPiece) | oldPiece; break;
+        case board::b_general: this->b_general = (b_general ^ newPiece) | oldPiece; this->b_board = (b_board ^ newPiece) | oldPiece; break;
+        case board::b_officer: this->b_officer = (b_officer ^ newPiece) | oldPiece; this->b_board = (b_board ^ newPiece) | oldPiece; break;
+        case board::b_rook:    this->b_rook    = (b_rook    ^ newPiece) | oldPiece; this->b_board = (b_board ^ newPiece) | oldPiece; break;
+        case board::b_knight:  this->b_knight  = (b_knight  ^ newPiece) | oldPiece; this->b_board = (b_board ^ newPiece) | oldPiece; break;
+        case board::b_pawn:    this->b_pawn    = (b_pawn    ^ newPiece) | oldPiece; this->b_board = (b_board ^ newPiece) | oldPiece; break;
+        case board::none: break;
+    }
+
+    this->pieceArray[move.origin] = move.piece;
+    this->pieceArray[move.destination] = record.capturedPiece;
+
+    if (record.capturedPiece != board::none) {
+        ul capturedBit = newPiece;
+        // capturedBit |= ~board::FULL_BOARD;
+        switch (record.capturedPiece) {
+            case board::w_general: this->w_general |= capturedBit; this->w_board |= capturedBit; break;
+            case board::w_officer: this->w_officer |= capturedBit; this->w_board |= capturedBit; break;
+            case board::w_rook:    this->w_rook    |= capturedBit; this->w_board |= capturedBit; break;
+            case board::w_knight:  this->w_knight  |= capturedBit; this->w_board |= capturedBit; break;
+            case board::w_pawn:    this->w_pawn    |= capturedBit; this->w_board |= capturedBit; break;
+            case board::b_general: this->b_general |= capturedBit; this->b_board |= capturedBit; break;
+            case board::b_officer: this->b_officer |= capturedBit; this->b_board |= capturedBit; break;
+            case board::b_rook:    this->b_rook    |= capturedBit; this->b_board |= capturedBit; break;
+            case board::b_knight:  this->b_knight  |= capturedBit; this->b_board |= capturedBit; break;
+            case board::b_pawn:    this->b_pawn    |= capturedBit; this->b_board |= capturedBit; break;
+            case board::none: break;
+        }
+    }
+
+    this->full_board = this->w_board | this->b_board;
+    this->cleanBitBoards();
+}
+
+void Board::cleanBitBoards() {
+    this->w_general &= board::FULL_BOARD;
+    this->w_officer &= board::FULL_BOARD;
+    this->w_rook    &= board::FULL_BOARD;
+    this->w_knight  &= board::FULL_BOARD;
+    this->w_pawn    &= board::FULL_BOARD;
+    this->w_board   &= board::FULL_BOARD;
+    this->b_general &= board::FULL_BOARD;
+    this->b_officer &= board::FULL_BOARD;
+    this->b_rook    &= board::FULL_BOARD;
+    this->b_knight  &= board::FULL_BOARD;
+    this->b_pawn    &= board::FULL_BOARD;
+    this->b_board   &= board::FULL_BOARD;
+    this->full_board &= board::FULL_BOARD;
 }
 
 bool Board::isCheckmated(bool sideIsWhite) const {
@@ -150,6 +205,25 @@ bool Board::isCheckmated(bool sideIsWhite) const {
     //     if (moveOpt.has_value()) ret = false;
     // }
     // return ret;
+}
+
+std::pair<uint, uint> Board::getCheckCount() const {
+    uint whiteCheckCount = 0;
+    uint blackCheckCount = 0;
+    const std::array<std::optional<board::MovePair>, 49> moves = this->getAllMovesAsBitboards();
+    for (const auto& optMovePair : moves) {
+        if (optMovePair.has_value()) {
+            const auto [piece, moveBitBoard] = optMovePair.value();
+            const bool isWhitePiece = board::pieceIsWhite(piece);
+            if ((moveBitBoard & this->w_general) > 0 && !isWhitePiece) {
+                whiteCheckCount++;
+            }
+            if ((moveBitBoard & this->b_general) > 0 && isWhitePiece) {
+                blackCheckCount++;
+            }
+        }
+    }
+    return std::make_pair(whiteCheckCount, blackCheckCount);
 }
 
 bool Board::moveIsCheck(bool sideIsWhite, board::move move) const {
@@ -186,13 +260,13 @@ std::array<std::optional<board::MovePair>, 49> Board::getAllMovesAsBitboards() c
     std::array<std::optional<board::MovePair>, 49> ret;
     for (uint i = 0; i < 49; i++) {
         board::piece piece = this->pieceArray[i];
-        if (piece != board::none) {
-            ul moves = this->getMoveMask(i);
-            ret[i] = std::make_optional(std::make_pair(piece, moves));
-        }
-        else {
+        if (piece == board::none) {
             ret[i] = std::nullopt;
             continue;
+        }
+        else {
+            ul moves = this->getMoveMask(i);
+            ret[i] = std::make_pair(piece, moves);
         }
     }
     return ret;
@@ -255,9 +329,9 @@ static ul getCheckCleanedBoard(const Board *board, board::piece piece, int origi
     ul cleanedBoard = dirtyBoard;
     int generalPos;
     if (sideIsWhite)
-        generalPos = std::countr_zero(board->w_general);
+        generalPos = board::getPos(board->w_general);
     else 
-        generalPos = std::countr_zero(board->b_general);
+        generalPos = board::getPos(board->b_general);
 
     for (int i = 0; i < 49; i++) {
         int bit = (dirtyBoard << i) & 1;
@@ -308,7 +382,7 @@ namespace board {
         namespace w_officer {
             ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::OFFICER_MOVES[pos];
-                uint genPos = std::countr_zero(board->w_general);
+                uint genPos = board::getPos(board->w_general);
                 assert(genPos <= board::GENERAL_FIELDS.size());
                 ul field = board::GENERAL_FIELDS[genPos];
                 move &= field;
@@ -346,8 +420,8 @@ namespace board {
         namespace b_officer {
             ul getMoveMask(const Board *board, board::piece piece, int pos) {
                 ul move = board::OFFICER_MOVES[pos];
-                uint genPos = std::countr_zero(board->b_general);
-                assert(genPos <= board::GENERAL_FIELDS.size());
+                uint genPos = board::getPos(board->b_general);
+                // assert(genPos <= board::GENERAL_FIELDS.size());
                 ul field = board::GENERAL_FIELDS[genPos];
                 move &= field;
                 return getCheckCleanedBoard(board, piece, pos, move, false);

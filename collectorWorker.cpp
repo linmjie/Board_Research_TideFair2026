@@ -62,3 +62,4 @@ void MassCollector<C, I>::manager() {
 
 //temp fix
 template class MassCollector<RandomBot, RandomBot>;
+template class MassCollector<ScienceBot, ScienceBot>;
