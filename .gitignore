@@ -9,3 +9,4 @@ output.dSYM/
 compile_commands.json
 
 DELETE*
+*.csv
